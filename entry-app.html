@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>⛽ पेट्रोल पंप एंट्री</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ══════════════════════════════════════
+     🔥 FIREBASE SDK
+══════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script>
+/* ══════════════════════════════════════
+   🔥 तुमचा FIREBASE CONFIG येथे टाका
+   Firebase Console → Project Settings → Your Apps → Config
+══════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "AIzaSy-TUMCHA-API-KEY-YEThE-TAKA",
+  authDomain:        "tumcha-project.firebaseapp.com",
+  projectId:         "tumcha-project-id",
+  storageBucket:     "tumcha-project.appspot.com",
+  messagingSenderId: "123456789012",
+  appId:             "1:123456789012:web:abc123def456"
+};
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const storage = firebase.storage();
+</script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f1f5f9;--card:#fff;--border:#e2e8f0;--b2:#cbd5e1;--blue:#2563eb;--blue2:#1d4ed8;--blt:#eff6ff;--grn:#16a34a;--glt:#f0fdf4;--red:#dc2626;--rlt:#fef2f2;--yel:#d97706;--ylt:#fffbeb;--ora:#ea580c;--pur:#7c3aed;--plt:#faf5ff;--txt:#1e293b;--t2:#475569;--mut:#94a3b8;--sh:0 2px 12px rgba(0,0,0,.07)}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+.screen{display:none;min-height:100vh;flex-direction:column}.screen.active{display:flex}
+.center{align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#eff6ff,#f0fdf4)}
+.acard{width:100%;max-width:400px;background:var(--card);border-radius:20px;border:1px solid var(--border);padding:28px 24px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.brand{text-align:center;margin-bottom:22px}.brand .ico{font-size:48px;display:block;margin-bottom:8px}.brand h1{color:var(--blue);font-size:20px;font-weight:800;margin-bottom:4px}.brand p{color:var(--mut);font-size:12px;line-height:1.5}
+.field{margin-bottom:13px}.field label{display:block;color:var(--t2);font-size:12px;font-weight:700;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border-radius:10px;font-size:14px;background:#f8fafc;border:1.5px solid var(--b2);color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;transition:.2s;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.field textarea{resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:800;font-size:14px;cursor:pointer;font-family:'Noto Sans',sans-serif;transition:.12s}.btn:active{transform:scale(.98)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 4px 16px rgba(37,99,235,.28)}
+.btn-dis{opacity:.5;cursor:not-allowed}
+.err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;font-weight:600;min-height:16px}
+.link{color:var(--blue);cursor:pointer;font-weight:700}.lrow{text-align:center;margin-top:13px;font-size:12px;color:var(--mut)}
+/* WAIT */
+#sw{align-items:center;justify-content:center;padding:24px;text-align:center;background:linear-gradient(135deg,#eff6ff,#f0fdf4)}
+.ww{max-width:340px;width:100%}.pulse{font-size:58px;display:inline-block;animation:pu 2s ease-in-out infinite;margin-bottom:12px}
+@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.wt{font-size:20px;font-weight:800;color:var(--yel);margin-bottom:8px}.ws{color:var(--t2);font-size:13px;line-height:1.6;margin-bottom:16px}
+.icard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:left;margin-bottom:14px;box-shadow:var(--sh)}
+.irow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}.irow:last-child{border-bottom:none}
+.il{color:var(--mut);font-size:12px}.iv{font-weight:700;text-align:right;flex:1;margin-left:10px}
+.rbtn{background:var(--card);border:1.5px solid var(--b2);color:var(--t2);padding:11px 22px;border-radius:10px;cursor:pointer;font-size:13px;font-family:'Noto Sans',sans-serif;font-weight:700;box-shadow:var(--sh)}
+.rej-note{color:var(--red);background:var(--rlt);border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:14px;font-weight:600;display:none}
+/* APP HEADER */
+.app-hdr{background:linear-gradient(135deg,var(--blue),var(--blue2));padding:15px 15px 13px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.upill{display:flex;align-items:center;gap:9px}
+.ava{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border:2px solid rgba(255,255,255,.4);flex-shrink:0;color:#fff}
+.uname{font-weight:800;font-size:13px;color:#fff}.umeta{font-size:11px;color:rgba(255,255,255,.75)}
+.lbtn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'Noto Sans',sans-serif;font-weight:700}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sc{background:rgba(255,255,255,.15);border-radius:9px;padding:9px 5px;text-align:center;border:1px solid rgba(255,255,255,.2)}
+.sv{font-size:14px;font-weight:800;color:#fff}.sl{font-size:9px;color:rgba(255,255,255,.7);margin-top:2px}
+/* TABS */
+.tabs{display:flex;background:var(--card);border-bottom:2px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.tab{flex:1;padding:12px 0;background:none;border:none;border-bottom:3px solid transparent;color:var(--mut);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans',sans-serif;white-space:nowrap;transition:.2s;position:relative;margin-bottom:-2px}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.ndot{position:absolute;top:8px;right:10px;width:7px;height:7px;background:var(--red);border-radius:50%;display:none;border:1.5px solid #fff}.ndot.on{display:block}
+.content{max-width:480px;margin:0 auto;padding:14px 13px;width:100%}
+.fcard{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:17px;margin-bottom:13px;box-shadow:var(--sh)}
+/* PHOTO ZONE */
+.pz-empty{border:2px dashed var(--b2);border-radius:12px;padding:22px;text-align:center;cursor:pointer;transition:.2s;background:#f8fafc}
+.pz-empty:hover{border-color:var(--blue);background:var(--blt)}
+.pz-ico{font-size:30px;margin-bottom:6px}.pz-ttl{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:3px}.pz-sub{font-size:11px;color:var(--mut)}
+.pz-preview{display:none;border:2px solid var(--grn);border-radius:12px;overflow:hidden}
+.pz-img{width:100%;max-height:200px;object-fit:cover;display:block;cursor:pointer}
+.pz-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--glt);border-top:1px solid #bbf7d0;flex-wrap:wrap;gap:7px}
+.pz-ok{color:var(--grn);font-size:12px;font-weight:700}
+.pz-btns{display:flex;gap:6px}
+.pz-retake{background:#fff;border:1.5px solid var(--b2);color:var(--t2);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif;transition:.12s}
+.pz-retake:hover{border-color:var(--ora);color:var(--ora)}
+.pz-zoom{background:var(--blt);border:1.5px solid #bfdbfe;color:var(--blue);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif}
+/* ALERTS */
+.ok-box{background:var(--glt);border:1px solid #bbf7d0;border-radius:11px;padding:12px;margin-bottom:12px;color:var(--grn);font-weight:700;text-align:center;display:none}.ok-box.on{display:block}
+.edit-bar{background:var(--ylt);border:1.5px solid #fde68a;border-radius:11px;padding:10px 13px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;gap:8px}.edit-bar.on{display:flex}
+.eb-txt{font-size:13px;font-weight:700;color:var(--yel)}.eb-cancel{background:#fff;border:1px solid #fde68a;color:var(--yel);padding:5px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:30px;color:var(--mut);font-size:13px;font-weight:600}
+.spin{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* UPLOADING */
+.upload-bar{background:var(--blt);border:1px solid #bfdbfe;border-radius:8px;padding:9px 12px;font-size:12px;color:var(--blue);font-weight:600;display:none;align-items:center;gap:8px;margin-bottom:10px}
+.upload-bar.on{display:flex}
+/* BADGES */
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}.bp{background:#fef3c7;color:#92400e}.ba{background:#dcfce7;color:#14532d}.br{background:#fee2e2;color:#991b1b}.brs{background:#dbeafe;color:#1e40af}
+/* DAY BLOCKS */
+.day-block{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:11px;overflow:hidden;box-shadow:var(--sh)}
+.day-hdr{background:linear-gradient(135deg,#f0f9ff,#f0fdf4);padding:11px 13px;border-bottom:1px solid var(--border)}
+.day-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.day-date{font-size:13px;font-weight:800}
+.day-stats{display:flex;gap:6px;flex-wrap:wrap}
+.ds{flex:1;min-width:70px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px;text-align:center}
+.ds .v{font-size:13px;font-weight:800}.ds .l{font-size:9px;color:var(--mut);margin-top:1px}
+.txnrow{padding:12px 13px;border-bottom:1px solid var(--border)}.txnrow:last-child{border-bottom:none}
+.txn-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.txn-thumb{width:100%;border-radius:8px;margin-top:7px;max-height:130px;object-fit:cover;cursor:pointer;border:1px solid var(--border)}
+.pay-row{padding:9px 13px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.pay-row.by-admin{background:var(--glt);border-left:3px solid var(--grn)}
+.pay-row.by-cashier{background:var(--plt);border-left:3px solid var(--pur)}
+.payer-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px}
+.pt-admin{background:#dcfce7;color:#14532d}.pt-cashier{background:#ede9fe;color:#5b21b6}
+.day-bal{display:flex;justify-content:space-between;padding:9px 13px;background:linear-gradient(135deg,var(--glt),var(--blt));border-top:1px solid var(--border);font-size:12px;font-weight:700}
+/* ANALYSIS */
+.an-card{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--sh)}
+.an-hdr{padding:11px 14px;background:linear-gradient(135deg,var(--blt),var(--glt));border-bottom:1px solid var(--border);font-size:12px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.6px}
+.an-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px}.an-row:last-child{border-bottom:none}
+.ar-l{color:var(--t2)}.ar-v{font-weight:800}
+.an-total{background:var(--glt);padding:12px 14px;display:flex;justify-content:space-between;font-weight:800;font-size:14px;border-top:1px solid var(--border)}
+.dag{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.dag-box{flex:1;min-width:68px;border-radius:9px;padding:8px;text-align:center;border:1px solid}
+.dag-v{font-size:13px;font-weight:800}.dag-l{font-size:9px;margin-top:1px;color:var(--mut)}
+/* RT STATUS */
+.rt-status{position:fixed;bottom:14px;right:14px;background:var(--card);border:1.5px solid #bbf7d0;color:var(--grn);padding:6px 13px;border-radius:20px;font-size:11px;font-weight:700;box-shadow:var(--sh);z-index:100;display:flex;align-items:center;gap:5px}
+.rt-dot{width:8px;height:8px;border-radius:50%;background:var(--grn);animation:rtpulse 2s infinite}
+@keyframes rtpulse{0%,100%{opacity:1}50%{opacity:.4}}
+.rt-status.offline{border-color:#fecaca;color:var(--red)}.rt-status.offline .rt-dot{background:var(--red);animation:none}
+.empty{text-align:center;color:var(--mut);padding:50px 20px}.e-ico{font-size:42px;margin-bottom:10px}
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal img{max-width:100%;max-height:90vh;border-radius:12px}
+.m-close{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;font-weight:700;font-family:'Noto Sans',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- REGISTER -->
+<div id="sr" class="screen center active">
+  <div class="acard">
+    <div class="brand"><span class="ico">⛽</span><h1>पेट्रोल पंप एंट्री</h1><p>नोंदणी करा — Admin मंजुरीनंतर अॅप सुरू होईल</p></div>
+    <div class="field"><label>👤 पूर्ण नाव</label><input type="text" id="rn" placeholder="तुमचे पूर्ण नाव"></div>
+    <div class="field"><label>📱 मोबाईल नंबर</label><input type="tel" id="rm" placeholder="10 अंकी" maxlength="10" inputmode="numeric"></div>
+    <div class="field"><label>📍 ठिकाण / पेट्रोल पंप</label><input type="text" id="rl" placeholder="पंपाचे नाव किंवा पत्ता"></div>
+    <div class="field"><label>🔐 पासवर्ड</label><input type="password" id="rp" placeholder="किमान 4 अंक"></div>
+    <div class="field"><label>🔐 पासवर्ड पुन्हा</label><input type="password" id="rp2" placeholder="पुन्हा टाका"></div>
+    <button class="btn btn-blue" id="reg-btn" onclick="doReg()">📤 नोंदणी पाठवा</button>
+    <div class="err" id="rerr"></div>
+    <div class="lrow">आधीच नोंदणी? <span class="link" onclick="go('sl')">लॉगिन करा →</span></div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="sl" class="screen center">
+  <div class="acard">
+    <div class="brand"><span class="ico">🔐</span><h1>लॉगिन करा</h1><p>मोबाईल नंबर व पासवर्ड टाका</p></div>
+    <div class="field"><label>📱 मोबाईल नंबर</label><input type="tel" id="lm" placeholder="10 अंकी" maxlength="10" inputmode="numeric"></div>
+    <div class="field"><label>🔐 पासवर्ड</label><input type="password" id="lp" placeholder="पासवर्ड" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-blue" id="log-btn" onclick="doLogin()">लॉगिन करा →</button>
+    <div class="err" id="lerr"></div>
+    <div class="lrow">नवीन? <span class="link" onclick="go('sr')">नोंदणी करा →</span></div>
+  </div>
+</div>
+
+<!-- WAIT -->
+<div id="sw" class="screen">
+  <div class="ww">
+    <div class="pulse">⏳</div>
+    <div class="wt">Admin मंजुरीची प्रतीक्षा</div>
+    <div class="ws">तुमची नोंदणी Firebase मध्ये गेली आहे.<br>Admin मंजूर करताच अॅप <strong>आपोआप</strong> सुरू होईल!</div>
+    <div class="icard" id="winfo"></div>
+    <div class="rej-note" id="rejnote">❌ Admin ने नोंदणी नाकारली.</div>
+    <span class="link" style="font-size:12px" onclick="doLogout()">← वेगळ्या अकाउंटने लॉगिन करा</span>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="sa" class="screen">
+  <div class="app-hdr">
+    <div class="hdr-top">
+      <div class="upill"><div class="ava" id="ava">👤</div><div><div class="uname" id="aname">-</div><div class="umeta" id="ameta">-</div></div></div>
+      <button class="lbtn" onclick="doLogout()">लॉगआउट</button>
+    </div>
+    <div class="sgrid">
+      <div class="sc"><div class="sv" id="hs-p">0</div><div class="sl">प्रतीक्षेत</div></div>
+      <div class="sc"><div class="sv" id="hs-a">0</div><div class="sl">मंजूर</div></div>
+      <div class="sc"><div class="sv" id="hs-amt">₹0</div><div class="sl">मंजूर रक्कम</div></div>
+      <div class="sc"><div class="sv" id="hs-bal">₹0</div><div class="sl">बाकी</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="t-new" onclick="swTab('new',this)">➕ नवीन एंट्री</button>
+    <button class="tab" onclick="swTab('hist',this)">📋 हिशोब<span class="ndot" id="rejdot"></span></button>
+    <button class="tab" onclick="swTab('anlys',this)">📊 विश्लेषण</button>
+  </div>
+  <div id="tab-new" class="content">
+    <div class="ok-box" id="okbox"></div>
+    <div class="fcard">
+      <div class="edit-bar" id="edit-bar"><span class="eb-txt">✏️ नाकारलेली एंट्री सुधारत आहात</span><button class="eb-cancel" onclick="cancelEdit()">✕ रद्द करा</button></div>
+      <div class="grid2">
+        <div class="field"><label>📅 तारीख</label><input type="date" id="fdt"></div>
+        <div class="field"><label>🚗 वाहन क्रमांक</label><input type="text" id="fvh" placeholder="MH-XX-XXXX" style="text-transform:uppercase"></div>
+      </div>
+      <div class="field"><label>🔖 व्यवहार प्रकार</label>
+        <select id="ftp"><option value="fuel">⛽ डिझेल / इंधन</option><option value="oil">🛢️ तेल</option><option value="repair">🔧 दुरुस्ती</option><option value="other">📦 इतर</option></select>
+      </div>
+      <div class="field"><label>💰 रक्कम (₹)</label><input type="number" id="famt" placeholder="0.00" min="0" inputmode="decimal"></div>
+      <div class="field"><label>🧾 ट्रांजेक्शन ID / Ref</label><input type="text" id="fref" placeholder="TXN123456..."></div>
+      <div class="field">
+        <label>📸 ट्रांजेक्शन फोटो</label>
+        <div id="pze-f" class="pz-empty" onclick="trigPh('f')"><div class="pz-ico">📷</div><div class="pz-ttl">फोटो काढा किंवा गॅलरीतून निवडा</div><div class="pz-sub">ट्रांजेक्शन स्लिपचा फोटो</div></div>
+        <input type="file" id="ph-f" accept="image/*" capture="environment" style="display:none" onchange="onPh(this,'f')">
+        <div class="pz-preview" id="pzp-f">
+          <img id="pzi-f" class="pz-img" alt="photo" onclick="openMod(getPh('f'))">
+          <div class="pz-bar"><div class="pz-ok">✅ फोटो OK</div><div class="pz-btns"><button class="pz-zoom" onclick="openMod(getPh('f'))">🔍 मोठा</button><button class="pz-retake" onclick="retakePh('f')">📷 पुन्हा काढा</button></div></div>
+        </div>
+      </div>
+      <div class="upload-bar" id="upload-bar"><div class="spin"></div><span>📤 फोटो Firebase Storage ला upload होत आहे...</span></div>
+      <div class="field"><label>📝 नोंद</label><textarea id="fnote" rows="2" placeholder="अतिरिक्त माहिती..."></textarea></div>
+      <button class="btn btn-blue" id="subbtn" onclick="submitTxn()">📤 मंजुरीसाठी पाठवा</button>
+    </div>
+  </div>
+  <div id="tab-hist" class="content" style="display:none">
+    <div id="histlist"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div>
+  </div>
+  <div id="tab-anlys" class="content" style="display:none">
+    <div id="anlyslist"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div>
+  </div>
+</div>
+
+<div class="modal" id="pmod" onclick="closeMod()"><button class="m-close" onclick="closeMod()">✕</button><img id="modimg" src="" alt="photo"></div>
+<div class="rt-status" id="rtst"><div class="rt-dot"></div>Firebase लाईव्ह</div>
+
+<script>
+const TL={fuel:'⛽ डिझेल',oil:'🛢️ तेल',repair:'🔧 दुरुस्ती',other:'📦 इतर'};
+const famt=n=>'₹'+Number(n).toLocaleString('en-IN');
+const ini=n=>(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const SK='jcb_entry_sess';
+
+let me=null,curtab='new',editId=null;
+let unsubTxns=null,unsubPays=null,unsubUser=null;
+let myTxns=[],myPays=[];
+let localPhotoFile=null; // temp before upload
+
+// ── SCREEN ──
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function doLogout(){
+  if(unsubTxns)unsubTxns();if(unsubPays)unsubPays();if(unsubUser)unsubUser();
+  unsubTxns=unsubPays=unsubUser=null;me=null;editId=null;
+  sessionStorage.removeItem(SK);go('sr');
+}
+
+// ── PHOTO ──
+function trigPh(id){document.getElementById('ph-'+id).click()}
+function onPh(inp,id){
+  const f=inp.files[0];if(!f)return;
+  localPhotoFile=f;
+  const r=new FileReader();
+  r.onload=e=>{
+    document.getElementById('pzi-'+id).src=e.target.result;
+    document.getElementById('pze-'+id).style.display='none';
+    document.getElementById('pzp-'+id).style.display='block';
+  };r.readAsDataURL(f);
+}
+function retakePh(id){
+  localPhotoFile=null;
+  document.getElementById('pzi-'+id).src='';
+  document.getElementById('pzp-'+id).style.display='none';
+  document.getElementById('pze-'+id).style.display='block';
+  document.getElementById('ph-'+id).value='';
+  setTimeout(()=>document.getElementById('ph-'+id).click(),120);
+}
+function getPh(id){const img=document.getElementById('pzi-'+id);return img&&img.src&&img.src.length>100?img.src:null}
+function openMod(src){if(!src)return;document.getElementById('modimg').src=src;document.getElementById('pmod').classList.add('open')}
+function closeMod(){document.getElementById('pmod').classList.remove('open')}
+
+// ── UPLOAD PHOTO TO FIREBASE STORAGE ──
+async function uploadPhoto(file,path){
+  if(!file)return null;
+  try{
+    const ref=storage.ref(path);
+    await ref.put(file);
+    return await ref.getDownloadURL();
+  }catch(e){console.warn('Photo upload failed:',e);return null;}
+}
+
+// ── REGISTER ──
+async function doReg(){
+  const n=document.getElementById('rn').value.trim(),m=document.getElementById('rm').value.trim(),l=document.getElementById('rl').value.trim(),p=document.getElementById('rp').value,p2=document.getElementById('rp2').value,e=document.getElementById('rerr');
+  e.textContent='';
+  if(!n){e.textContent='👤 नाव टाका';return}
+  if(!/^\d{10}$/.test(m)){e.textContent='📱 10 अंकी मोबाईल नंबर टाका';return}
+  if(p.length<4){e.textContent='🔐 किमान 4 अंकी पासवर्ड टाका';return}
+  if(p!==p2){e.textContent='🔐 पासवर्ड जुळत नाही';return}
+  const btn=document.getElementById('reg-btn');btn.textContent='⏳ पाठवत आहे...';btn.classList.add('btn-dis');btn.disabled=true;
+  try{
+    // Check if mobile exists
+    const existing=await db.collection('users').where('mobile','==',m).where('type','==','operator').get();
+    if(!existing.empty){e.textContent='📱 हा नंबर आधीच नोंदणी केलेला आहे';return}
+    const id='op_'+Date.now();
+    const user={id,name:n,mobile:m,location:l,pass:p,status:'pending',type:'operator',registeredAt:new Date().toISOString()};
+    await db.collection('users').doc(id).set(user);
+    sessionStorage.setItem(SK,JSON.stringify({id}));
+    showWait(user);
+    startUserListener(id);
+  }catch(err){e.textContent='❌ Error: '+err.message}
+  finally{btn.textContent='📤 नोंदणी पाठवा';btn.classList.remove('btn-dis');btn.disabled=false;}
+}
+
+// ── LOGIN ──
+async function doLogin(){
+  const m=document.getElementById('lm').value.trim(),p=document.getElementById('lp').value,e=document.getElementById('lerr');
+  e.textContent='';
+  const btn=document.getElementById('log-btn');btn.textContent='⏳ लॉगिन होत आहे...';btn.disabled=true;
+  try{
+    const snap=await db.collection('users').where('mobile','==',m).where('pass','==',p).where('type','==','operator').limit(1).get();
+    if(snap.empty){e.textContent='❌ मोबाईल नंबर किंवा पासवर्ड चुकीचा';return}
+    const user={id:snap.docs[0].id,...snap.docs[0].data()};
+    sessionStorage.setItem(SK,JSON.stringify({id:user.id}));
+    route(user);
+  }catch(err){e.textContent='❌ Error: '+err.message}
+  finally{btn.textContent='लॉगिन करा →';btn.disabled=false;}
+}
+function route(u){if(u.status==='approved')openApp(u);else{showWait(u);startUserListener(u.id)}}
+
+// ── USER LISTENER (auto-approve on wait screen) ──
+function startUserListener(uid){
+  if(unsubUser)unsubUser();
+  unsubUser=db.collection('users').doc(uid).onSnapshot(doc=>{
+    if(!doc.exists)return;
+    const u={id:doc.id,...doc.data()};
+    if(u.status==='approved'&&!me)openApp(u);
+    else if(u.status==='rejected')document.getElementById('rejnote').style.display='block';
+  },err=>console.warn('User listener:',err));
+}
+
+// ── WAIT ──
+function showWait(u){
+  go('sw');
+  document.getElementById('winfo').innerHTML=`<div class="irow"><span class="il">👤 नाव</span><span class="iv">${u.name}</span></div><div class="irow"><span class="il">📱 मोबाईल</span><span class="iv">${u.mobile}</span></div><div class="irow"><span class="il">📍 ठिकाण</span><span class="iv">${u.location||'-'}</span></div><div class="irow"><span class="il">📊 स्थिती</span><span class="iv" style="color:var(--yel)">⏳ प्रतीक्षेत</span></div>`;
+  document.getElementById('rejnote').style.display=u.status==='rejected'?'block':'none';
+}
+
+// ── OPEN APP ──
+function openApp(u){
+  me=u;go('sa');
+  document.getElementById('ava').textContent=ini(u.name);
+  document.getElementById('aname').textContent=u.name;
+  document.getElementById('ameta').textContent='📱 '+u.mobile+(u.location?' | 📍 '+u.location:'');
+  document.getElementById('fdt').value=new Date().toISOString().split('T')[0];
+  startListeners();
+}
+
+// ── REAL-TIME LISTENERS ──
+function startListeners(){
+  // Transactions listener
+  if(unsubTxns)unsubTxns();
+  unsubTxns=db.collection('transactions').where('userId','==',me.id)
+    .orderBy('submittedAt','desc').onSnapshot(snap=>{
+      myTxns=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updStats();
+      if(curtab==='hist')renderHist();
+      if(curtab==='anlys')renderAnlys();
+    },err=>{console.warn('Txn listener:',err);setOffline()});
+
+  // Payments listener
+  if(unsubPays)unsubPays();
+  unsubPays=db.collection('cash_payments').where('userId','==',me.id)
+    .orderBy('recordedAt','desc').onSnapshot(snap=>{
+      myPays=snap.docs.map(d=>({id:d.id,...d.data()}));
+      updStats();
+      if(curtab==='hist')renderHist();
+      if(curtab==='anlys')renderAnlys();
+    },err=>console.warn('Pay listener:',err));
+}
+function setOffline(){document.getElementById('rtst').className='rt-status offline';document.getElementById('rtst').innerHTML='<div class="rt-dot"></div>Offline'}
+
+// ── STATS ──
+function updStats(){
+  const appr=myTxns.filter(t=>t.status==='approved');
+  const rej=myTxns.filter(t=>t.status==='rejected');
+  const online=appr.reduce((s,t)=>s+t.amount,0);
+  const paid=myPays.reduce((s,c)=>s+c.amount,0);
+  document.getElementById('hs-p').textContent=myTxns.filter(t=>t.status==='pending'||t.status==='resubmitted').length;
+  document.getElementById('hs-a').textContent=appr.length;
+  document.getElementById('hs-amt').textContent=famt(online);
+  document.getElementById('hs-bal').textContent=famt(Math.max(0,online-paid));
+  document.getElementById('rejdot').classList.toggle('on',rej.length>0);
+}
+
+// ── TABS ──
+function swTab(tab,btn){
+  curtab=tab;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  ['new','hist','anlys'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  document.getElementById('tab-'+tab).style.display='block';
+  if(tab==='hist')renderHist();if(tab==='anlys')renderAnlys();
+}
+
+// ── EDIT ──
+function startEdit(txnId){
+  const t=myTxns.find(t=>t.id===txnId);if(!t)return;
+  editId=txnId;localPhotoFile=null;
+  document.getElementById('fdt').value=t.date||'';document.getElementById('fvh').value=t.vehicle||'';
+  document.getElementById('ftp').value=t.type||'fuel';document.getElementById('famt').value=t.amount||'';
+  document.getElementById('fref').value=t.refNo||'';document.getElementById('fnote').value=t.note||'';
+  if(t.photoURL){document.getElementById('pzi-f').src=t.photoURL;document.getElementById('pzp-f').style.display='block';document.getElementById('pze-f').style.display='none'}
+  else{document.getElementById('pzi-f').src='';document.getElementById('pzp-f').style.display='none';document.getElementById('pze-f').style.display='block'}
+  document.getElementById('edit-bar').classList.add('on');
+  document.getElementById('subbtn').textContent='🔄 सुधारित एंट्री पाठवा';
+  document.getElementById('t-new').click();window.scrollTo(0,0);
+}
+function cancelEdit(){editId=null;localPhotoFile=null;resetForm();document.getElementById('edit-bar').classList.remove('on');document.getElementById('subbtn').textContent='📤 मंजुरीसाठी पाठवा'}
+function resetForm(){
+  ['famt','fvh','fref','fnote'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ftp').value='fuel';document.getElementById('fdt').value=new Date().toISOString().split('T')[0];
+  localPhotoFile=null;document.getElementById('ph-f').value='';document.getElementById('pzi-f').src='';
+  document.getElementById('pzp-f').style.display='none';document.getElementById('pze-f').style.display='block';
+}
+
+// ── SUBMIT ──
+async function submitTxn(){
+  const amt=document.getElementById('famt').value,vh=document.getElementById('fvh').value.trim().toUpperCase(),dt=document.getElementById('fdt').value;
+  if(!amt||parseFloat(amt)<=0){alert('💰 रक्कम टाका');return}
+  if(!vh){alert('🚗 वाहन क्रमांक टाका');return}
+  if(!dt){alert('📅 तारीख निवडा');return}
+  const btn=document.getElementById('subbtn');btn.disabled=true;btn.textContent='⏳ पाठवत आहे...';
+  try{
+    let photoURL=null;
+    if(localPhotoFile){
+      document.getElementById('upload-bar').classList.add('on');
+      photoURL=await uploadPhoto(localPhotoFile,'photos/'+me.id+'_'+Date.now()+'.jpg');
+      document.getElementById('upload-bar').classList.remove('on');
+    }
+    const now=new Date().toISOString();
+    if(editId){
+      const upd={date:dt,type:document.getElementById('ftp').value,amount:parseFloat(amt),vehicle:vh,refNo:document.getElementById('fref').value.trim(),note:document.getElementById('fnote').value.trim(),status:'resubmitted',resubmittedAt:now,rejectionNote:null};
+      if(photoURL)upd.photoURL=photoURL;
+      await db.collection('transactions').doc(editId).update(upd);
+    }else{
+      await db.collection('transactions').add({userId:me.id,userName:me.name,userMobile:me.mobile,userLocation:me.location||'',date:dt,type:document.getElementById('ftp').value,amount:parseFloat(amt),vehicle:vh,refNo:document.getElementById('fref').value.trim(),note:document.getElementById('fnote').value.trim(),photoURL,status:'pending',submittedAt:now});
+    }
+    const b=document.getElementById('okbox');
+    b.innerHTML=editId?'🔄 सुधारित एंट्री Firebase मध्ये गेली!':'✅ यशस्वीरित्या Firebase मध्ये गेले!';
+    b.classList.add('on');setTimeout(()=>b.classList.remove('on'),3000);
+    editId=null;localPhotoFile=null;resetForm();document.getElementById('edit-bar').classList.remove('on');
+    btn.textContent='📤 मंजुरीसाठी पाठवा';
+  }catch(err){alert('❌ Error: '+err.message)}
+  finally{btn.disabled=false;}
+}
+
+// ── HISTORY RENDER ──
+function bdg(s){if(s==='pending')return`<span class="badge bp">⏳ प्रतीक्षेत</span>`;if(s==='approved')return`<span class="badge ba">✅ मंजूर</span>`;if(s==='rejected')return`<span class="badge br">❌ नाकारले</span>`;if(s==='resubmitted')return`<span class="badge brs">🔄 पुन्हा</span>`;return''}
+function ptag(c){if(c.payerType==='admin')return`<span class="payer-tag pt-admin">👑 Admin</span>`;return`<span class="payer-tag pt-cashier">💵 कॅशियर: ${c.payerName||'-'}</span>`}
+
+function renderHist(){
+  const el=document.getElementById('histlist');
+  if(!myTxns.length&&!myPays.length){el.innerHTML=`<div class="empty"><div class="e-ico">📭</div><div style="font-weight:700">अजून कोणतेही व्यवहार नाहीत</div></div>`;return}
+  const byDate={};
+  myTxns.forEach(t=>{const d=t.date||'?';if(!byDate[d])byDate[d]={txns:[],pays:[]};byDate[d].txns.push(t)});
+  myPays.forEach(p=>{const d=p.date||'?';if(!byDate[d])byDate[d]={txns:[],pays:[]};byDate[d].pays.push(p)});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  el.innerHTML=dates.map(date=>{
+    const {txns:dt,pays:dp}=byDate[date];
+    const dayOnline=dt.filter(t=>t.status==='approved').reduce((s,t)=>s+t.amount,0);
+    const dayPaid=dp.reduce((s,c)=>s+c.amount,0);const dayBal=dayOnline-dayPaid;
+    return`<div class="day-block">
+      <div class="day-hdr"><div class="day-top"><span class="day-date">📅 ${date}</span></div>
+      <div class="day-stats">
+        ${dayOnline>0?`<div class="ds"><div class="v" style="color:var(--grn)">${famt(dayOnline)}</div><div class="l">ऑनलाईन</div></div>`:''}
+        ${dayPaid>0?`<div class="ds"><div class="v" style="color:var(--pur)">${famt(dayPaid)}</div><div class="l">मिळाले</div></div>`:''}
+        ${dayOnline>0?`<div class="ds"><div class="v" style="color:${dayBal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(dayBal))}</div><div class="l">${dayBal>0?'बाकी':'सेटल'}</div></div>`:''}
+      </div></div>
+      ${dt.map(t=>`<div class="txnrow">
+        <div class="txn-top"><div><div style="font-weight:700;font-size:14px">${TL[t.type]||'📦'}</div><div style="color:var(--mut);font-size:12px;margin-top:2px">🚗 ${t.vehicle}</div></div>${bdg(t.status)}</div>
+        <div style="color:var(--blue);font-weight:800;font-size:17px;margin:5px 0">${famt(t.amount)}</div>
+        ${t.refNo?`<div style="color:var(--mut);font-size:11px">🧾 ${t.refNo}</div>`:''}
+        ${t.note?`<div style="color:var(--mut);font-size:11px">📝 ${t.note}</div>`:''}
+        ${t.photoURL?`<img class="txn-thumb" src="${t.photoURL}" onclick="openMod('${t.photoURL}')" alt="photo"><div style="color:var(--mut);font-size:10px;margin-top:3px">📸 दाबा — मोठा पाहण्यासाठी</div>`:''}
+        ${t.rejectionNote?`<div style="color:var(--red);background:var(--rlt);border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:12px;margin-top:7px;font-weight:600">❌ कारण: ${t.rejectionNote}</div>`:''}
+        ${t.status==='rejected'?`<button onclick="startEdit('${t.id}')" style="width:100%;margin-top:9px;padding:9px;border-radius:9px;border:1.5px solid var(--ora);background:#fff7ed;color:var(--ora);font-weight:700;font-size:12px;cursor:pointer;font-family:'Noto Sans',sans-serif">✏️ सुधारणा करा व परत पाठवा</button>`:''}
+      </div>`).join('')}
+      ${dp.map(p=>`<div class="pay-row ${p.payerType==='admin'?'by-admin':'by-cashier'}">
+        <div><div style="font-weight:700">${p.payType==='online'?'📲':'💵'} ${famt(p.amount)}</div>${ptag(p)}${p.txnId?`<div style="color:var(--blue);font-size:11px">🧾 ${p.txnId}</div>`:''}</div>
+        <div style="color:var(--mut);font-size:10px">${new Date(p.recordedAt).toLocaleTimeString('mr-IN',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('')}
+      ${dayOnline>0?`<div class="day-bal"><span>दिवस बाकी</span><span style="color:${dayBal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(dayBal))} ${dayBal<=0?'✅ सेटल':''}</span></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderAnlys(){
+  const el=document.getElementById('anlyslist');
+  const appr=myTxns.filter(t=>t.status==='approved');
+  const totOnline=appr.reduce((s,t)=>s+t.amount,0);
+  const totPaid=myPays.reduce((s,c)=>s+c.amount,0);
+  const byDate={};
+  myTxns.forEach(t=>{const d=t.date||'?';if(!byDate[d])byDate[d]={online:0,paid:0};if(t.status==='approved')byDate[d].online+=t.amount});
+  myPays.forEach(c=>{const d=c.date||'?';if(!byDate[d])byDate[d]={online:0,paid:0};byDate[d].paid+=c.amount});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  el.innerHTML=`
+    <div class="an-card"><div class="an-hdr">📊 एकूण सारांश</div>
+      <div class="an-row"><span class="ar-l">✅ मंजूर ऑनलाईन</span><span class="ar-v" style="color:var(--grn)">${famt(totOnline)}</span></div>
+      <div class="an-row"><span class="ar-l">💵 मिळालेली रक्कम</span><span class="ar-v" style="color:var(--pur)">${famt(totPaid)}</span></div>
+      <div class="an-row"><span class="ar-l">⏳ प्रतीक्षेत</span><span class="ar-v" style="color:var(--ora)">${myTxns.filter(t=>t.status==='pending'||t.status==='resubmitted').length} व्यवहार</span></div>
+      <div class="an-total"><span>${totOnline-totPaid>0?'💰 बाकी':'✅ सर्व सेटल'}</span><span style="color:${totOnline-totPaid>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(totOnline-totPaid))}</span></div>
+    </div>
+    <div class="an-card"><div class="an-hdr">📅 दिवसनिहाय हिशोब</div>
+      ${dates.map(d=>{const {online,paid}=byDate[d];const bal=online-paid;return`<div class="an-row" style="flex-direction:column;align-items:stretch;gap:5px"><div style="font-weight:700;font-size:13px">📅 ${d}</div><div class="dag"><div class="dag-box" style="background:var(--glt);border-color:#bbf7d0"><div class="dag-v" style="color:var(--grn)">${famt(online)}</div><div class="dag-l">ऑनलाईन</div></div><div class="dag-box" style="background:var(--plt);border-color:#e9d5ff"><div class="dag-v" style="color:var(--pur)">${famt(paid)}</div><div class="dag-l">मिळाले</div></div><div class="dag-box" style="background:${bal>0?'var(--ylt)':'var(--glt)'};border-color:${bal>0?'#fde68a':'#bbf7d0'}"><div class="dag-v" style="color:${bal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(bal))}</div><div class="dag-l">${bal>0?'बाकी':'सेटल'}</div></div></div></div>`}).join('')}
+    </div>`;
+}
+
+// ── INIT ──
+(async function(){
+  const s=sessionStorage.getItem(SK);if(!s){go('sr');return}
+  const {id}=JSON.parse(s);
+  try{
+    const doc=await db.collection('users').doc(id).get();
+    if(!doc.exists){sessionStorage.removeItem(SK);go('sr');return}
+    const u={id:doc.id,...doc.data()};
+    route(u);
+  }catch(e){go('sr')}
+})();
+</script>
+</body>
+</html>

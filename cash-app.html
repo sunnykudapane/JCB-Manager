@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>💵 कॅश एंट्री</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script>
+/* ══════════════════════════════════════
+   🔥 तुमचा FIREBASE CONFIG येथे टाका
+══════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "AIzaSy-TUMCHA-API-KEY-YEThE-TAKA",
+  authDomain:        "tumcha-project.firebaseapp.com",
+  projectId:         "tumcha-project-id",
+  storageBucket:     "tumcha-project.appspot.com",
+  messagingSenderId: "123456789012",
+  appId:             "1:123456789012:web:abc123def456"
+};
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const storage = firebase.storage();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f0fdf4;--card:#fff;--border:#e2e8f0;--b2:#cbd5e1;--grn:#16a34a;--grn2:#15803d;--glt:#f0fdf4;--red:#dc2626;--rlt:#fef2f2;--yel:#d97706;--ylt:#fffbeb;--ora:#ea580c;--olt:#fff7ed;--pur:#7c3aed;--plt:#faf5ff;--blue:#2563eb;--blt:#eff6ff;--txt:#1e293b;--t2:#475569;--mut:#94a3b8;--sh:0 2px 12px rgba(0,0,0,.07)}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+.screen{display:none;min-height:100vh;flex-direction:column}.screen.active{display:flex}
+.center{align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#f0fdf4,#eff6ff)}
+.acard{width:100%;max-width:400px;background:var(--card);border-radius:20px;border:1px solid var(--border);padding:28px 24px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.brand{text-align:center;margin-bottom:22px}.brand .ico{font-size:48px;display:block;margin-bottom:8px}.brand h1{color:var(--grn);font-size:20px;font-weight:800;margin-bottom:4px}.brand p{color:var(--mut);font-size:12px;line-height:1.5}
+.field{margin-bottom:13px}.field label{display:block;color:var(--t2);font-size:12px;font-weight:700;margin-bottom:4px}
+.field input,.field select{width:100%;padding:11px 13px;border-radius:10px;font-size:14px;background:#f8fafc;border:1.5px solid var(--b2);color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;transition:.2s;-webkit-appearance:none}
+.field input:focus,.field select:focus{border-color:var(--grn);background:#fff;box-shadow:0 0 0 3px rgba(22,163,74,.08)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:800;font-size:14px;cursor:pointer;font-family:'Noto Sans',sans-serif;transition:.12s}.btn:active{transform:scale(.98)}
+.btn-grn{background:linear-gradient(135deg,var(--grn),var(--grn2));color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.28)}
+.btn-blue{background:linear-gradient(135deg,var(--blue),#1d4ed8);color:#fff}
+.btn-ghost{background:#f8fafc;border:1.5px solid var(--b2);color:var(--t2)}
+.err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;font-weight:600;min-height:16px}
+.link{color:var(--grn);cursor:pointer;font-weight:700}.lrow{text-align:center;margin-top:13px;font-size:12px;color:var(--mut)}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:40px;color:var(--mut);font-size:13px}
+.spin{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--grn);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* WAIT */
+#sw{align-items:center;justify-content:center;padding:24px;text-align:center;background:linear-gradient(135deg,#f0fdf4,#eff6ff)}
+.ww{max-width:340px;width:100%}.pulse{font-size:58px;display:inline-block;animation:pu 2s ease-in-out infinite;margin-bottom:12px}
+@keyframes pu{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.wt{font-size:20px;font-weight:800;color:var(--yel);margin-bottom:8px}.ws{color:var(--t2);font-size:13px;line-height:1.6;margin-bottom:16px}
+.icard{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;text-align:left;margin-bottom:14px;box-shadow:var(--sh)}
+.irow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}.irow:last-child{border-bottom:none}
+.il{color:var(--mut);font-size:12px}.iv{font-weight:700;text-align:right;flex:1;margin-left:10px}
+.rbtn{background:var(--card);border:1.5px solid var(--b2);color:var(--t2);padding:11px 22px;border-radius:10px;cursor:pointer;font-size:13px;font-family:'Noto Sans',sans-serif;font-weight:700;box-shadow:var(--sh)}
+.rej-note{color:var(--red);background:var(--rlt);border:1px solid #fecaca;border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:14px;font-weight:600;display:none}
+/* MAIN */
+#sa{display:none;flex-direction:column;min-height:100vh}#sa.on{display:flex}
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--grn),var(--grn2));padding:15px 15px 13px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.brand2{display:flex;align-items:center;gap:9px}.b2-ico{font-size:26px}.b2-name{color:#fff;font-size:17px;font-weight:800}.b2-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:1px}
+.b2-user{text-align:right}.b2-uname{color:#fff;font-size:12px;font-weight:700}.b2-umeta{color:rgba(255,255,255,.7);font-size:10px}
+.lout{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'Noto Sans',sans-serif;font-weight:700}
+.bal-banner{background:rgba(0,0,0,.15);border-radius:12px;padding:12px 14px;margin-bottom:4px}
+.bal-row-hdr{display:flex;gap:6px;margin-bottom:8px}
+.bal-box{flex:1;background:rgba(255,255,255,.15);border-radius:9px;padding:9px 5px;text-align:center;border:1px solid rgba(255,255,255,.2)}
+.bb-v{font-size:13px;font-weight:800;color:#fff}.bb-l{font-size:9px;color:rgba(255,255,255,.7);margin-top:1px;line-height:1.3}
+.bal-big{text-align:center;padding-top:4px}
+.bb-amt{font-size:26px;font-weight:800;color:#fff}.bb-lbl{font-size:11px;color:rgba(255,255,255,.75)}
+.rt-badge{position:fixed;bottom:14px;right:14px;background:var(--card);border:1.5px solid #bbf7d0;color:var(--grn);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;box-shadow:var(--sh);z-index:100;display:flex;align-items:center;gap:5px}
+.rt-dot{width:8px;height:8px;border-radius:50%;background:var(--grn);animation:rtpulse 2s infinite}
+@keyframes rtpulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* USER SEL */
+.usel-wrap{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:14px;margin:13px 13px 0;box-shadow:var(--sh)}
+.sel-lbl{display:block;color:var(--t2);font-size:12px;font-weight:700;margin-bottom:7px}
+.udrop{width:100%;padding:12px 13px;border-radius:12px;font-size:14px;font-weight:700;background:#f8fafc;border:2px solid var(--grn);color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;-webkit-appearance:none;cursor:pointer}
+.ustrip{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--glt);border-radius:11px;border:1px solid #bbf7d0}
+.su-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--grn),var(--grn2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.su-name{font-weight:800;font-size:13px}.su-meta{color:var(--mut);font-size:11px;margin-top:1px}
+/* CONTENT */
+.content{max-width:500px;margin:0 auto;padding:13px;width:100%}
+/* OP BALANCE CARD */
+.op-bal-card{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:13px;box-shadow:var(--sh)}
+.obc-hdr{padding:11px 14px;background:var(--glt);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.obc-title{font-size:12px;font-weight:800;color:var(--grn);text-transform:uppercase;letter-spacing:.6px}
+.bal-strips{display:flex}
+.bs{flex:1;padding:11px 7px;text-align:center;border-right:1px solid var(--border)}.bs:last-child{border-right:none}
+.bs-v{font-size:15px;font-weight:800}.bs-l{font-size:9px;color:var(--mut);margin-top:2px}
+.bal-highlight{padding:12px 14px;text-align:center;background:linear-gradient(135deg,var(--glt),var(--blt));border-top:1px solid var(--border)}
+.bh-amt{font-size:28px;font-weight:800;margin-bottom:3px}.bh-lbl{font-size:12px;color:var(--mut)}
+/* PAYMENT FORM */
+.pay-form{background:var(--card);border-radius:14px;border:2px solid #bbf7d0;padding:16px;margin-bottom:13px;box-shadow:var(--sh)}
+.pay-form-title{font-size:13px;font-weight:800;color:var(--grn);margin-bottom:13px}
+.edit-banner{background:var(--ylt);border:1.5px solid #fde68a;border-radius:11px;padding:10px 13px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;gap:8px}.edit-banner.on{display:flex}
+.eb-txt{font-size:13px;font-weight:700;color:var(--yel)}.eb-cancel{background:#fff;border:1px solid #fde68a;color:var(--yel);padding:5px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif}
+/* AMOUNT DISPLAY */
+.amt-display{background:#f8fafc;border:2px solid var(--b2);border-radius:14px;padding:15px;text-align:center;margin-bottom:12px;transition:.2s}
+.amt-display.active{border-color:var(--grn);background:var(--glt);box-shadow:0 0 0 3px rgba(22,163,74,.1)}
+.amt-display.over{border-color:var(--red);background:var(--rlt);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.amt-val{font-size:30px;font-weight:800}.amt-lbl{font-size:11px;color:var(--mut);margin-top:4px}
+.cur{display:inline-block;width:2px;height:26px;background:currentColor;margin-left:2px;animation:blink 1s infinite;vertical-align:middle;border-radius:1px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* WARNINGS */
+.warn-op{background:var(--rlt);border:1.5px solid #fecaca;border-radius:11px;padding:12px 14px;margin-bottom:12px;display:none}.warn-op.on{display:block}
+.warn-cas{background:var(--ylt);border:1.5px solid #fde68a;border-radius:11px;padding:12px 14px;margin-bottom:12px;display:none}.warn-cas.on{display:block}
+.w-title{font-weight:800;font-size:13px;margin-bottom:5px}.w-body{font-size:12px;line-height:1.6}
+.w-fixbtn{display:inline-block;padding:4px 12px;border-radius:8px;font-weight:800;margin-top:7px;font-size:12px;cursor:pointer}
+/* QUICK / NUMPAD */
+.quick-row{display:flex;gap:7px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.qbtn{padding:8px 12px;border-radius:10px;border:1.5px solid #bbf7d0;background:var(--glt);color:var(--grn);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans',sans-serif;white-space:nowrap;flex-shrink:0}
+.qbtn.full{background:#dcfce7;border-color:var(--grn)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:13px}
+.nk{background:#f8fafc;border:1.5px solid var(--b2);border-radius:12px;padding:14px 0;font-size:18px;font-weight:700;color:var(--txt);cursor:pointer;text-align:center;font-family:'Noto Sans',sans-serif;transition:.12s}
+.nk:active{background:var(--glt);border-color:var(--grn)}.nk.del{color:var(--mut);font-size:14px}
+/* PAY TYPE */
+.pay-type{display:flex;gap:8px;margin-bottom:12px}
+.pty{flex:1;padding:11px 6px;border-radius:11px;border:1.5px solid var(--b2);background:#f8fafc;color:var(--mut);font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans',sans-serif;text-align:center;transition:.15s}
+.pty.cash{border-color:var(--grn);background:var(--glt);color:var(--grn)}.pty.online{border-color:var(--blue);background:var(--blt);color:var(--blue)}
+/* ONLINE FIELDS */
+.online-fields{background:var(--blt);border:1.5px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:12px;display:none}.online-fields.on{display:block}
+.of-title{font-size:12px;font-weight:800;color:var(--blue);margin-bottom:10px}
+/* PHOTO ZONE */
+.pz-empty{border:2px dashed var(--b2);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:.2s;background:#f8fafc}
+.pz-empty:hover{border-color:var(--blue);background:var(--blt)}
+.pz-ico{font-size:28px;margin-bottom:5px}.pz-ttl{font-size:13px;font-weight:700;color:var(--t2);margin-bottom:3px}.pz-sub{font-size:11px;color:var(--mut)}
+.pz-preview{display:none;border:2px solid var(--blue);border-radius:12px;overflow:hidden}
+.pz-img{width:100%;max-height:180px;object-fit:cover;display:block;cursor:pointer}
+.pz-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--blt);border-top:1px solid #bfdbfe;flex-wrap:wrap;gap:7px}
+.pz-ok{font-size:12px;font-weight:700;color:var(--blue)}
+.pz-btns{display:flex;gap:6px}
+.pz-retake{background:#fff;border:1.5px solid var(--b2);color:var(--t2);padding:6px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif;transition:.12s}
+.pz-retake:hover{border-color:var(--ora);color:var(--ora)}
+.pz-zoom{background:var(--blt);border:1.5px solid #bfdbfe;color:var(--blue);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif}
+/* UPLOAD BAR */
+.upload-bar{background:var(--blt);border:1px solid #bfdbfe;border-radius:8px;padding:9px 12px;font-size:12px;color:var(--blue);font-weight:600;display:none;align-items:center;gap:8px;margin-bottom:10px}.upload-bar.on{display:flex}
+/* DATE NOTE */
+.dn-row{display:flex;gap:8px;margin-bottom:12px}
+.dnf{flex:1}.dnf label{display:block;color:var(--t2);font-size:11px;font-weight:700;margin-bottom:4px}
+.dnf input{width:100%;padding:10px 12px;border-radius:10px;font-size:13px;background:#f8fafc;border:1.5px solid var(--b2);color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;transition:.2s;-webkit-appearance:none}
+.dnf input:focus{border-color:var(--grn);background:#fff}
+/* SUBMIT */
+.sub-btn{width:100%;padding:15px;border-radius:14px;border:none;font-weight:800;font-size:15px;cursor:pointer;font-family:'Noto Sans',sans-serif;transition:.12s;letter-spacing:.3px}
+.sub-btn.ok{background:linear-gradient(135deg,var(--grn),var(--grn2));color:#fff;box-shadow:0 6px 20px rgba(22,163,74,.3)}
+.sub-btn.ol{background:linear-gradient(135deg,var(--blue),#1d4ed8);color:#fff;box-shadow:0 6px 20px rgba(37,99,235,.25)}
+.sub-btn.dis{opacity:.45;cursor:not-allowed}
+/* HISTORY */
+.hist-card{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;margin-bottom:13px;box-shadow:var(--sh)}
+.hc-hdr{padding:11px 14px;background:var(--plt);border-bottom:1px solid #e9d5ff;display:flex;justify-content:space-between;align-items:center}
+.hc-title{font-size:12px;font-weight:800;color:var(--pur);text-transform:uppercase;letter-spacing:.6px}
+.hc-row{padding:12px 14px;border-bottom:1px solid var(--border)}.hc-row:last-child{border-bottom:none}
+.hc-amt{font-weight:800;font-size:15px}.hc-meta{color:var(--mut);font-size:11px;margin-top:2px}
+.type-cash{background:#dcfce7;color:#14532d;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;display:inline-block;margin-top:3px}
+.type-online{background:var(--blt);color:#1e40af;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;display:inline-block;margin-top:3px}
+.hc-photo{width:100%;border-radius:8px;margin-top:8px;max-height:130px;object-fit:cover;cursor:pointer;border:1px solid var(--border)}
+.edit-btn{padding:6px 12px;border-radius:8px;border:1.5px solid #fde68a;background:var(--ylt);color:var(--yel);font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans',sans-serif}
+/* SUCCESS */
+.sf{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);border:2px solid var(--grn);border-radius:20px;padding:26px 32px;text-align:center;z-index:200;display:none;box-shadow:0 20px 60px rgba(0,0,0,.2);min-width:260px}
+.sf.on{display:block;animation:pop .28s ease}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.8);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.sf-ico{font-size:48px;margin-bottom:10px}.sf-msg{color:var(--grn);font-weight:800;font-size:15px}.sf-sub{color:var(--mut);font-size:12px;margin-top:6px;line-height:1.5}
+.no-user{text-align:center;color:var(--mut);padding:50px 20px}
+.empty{text-align:center;color:var(--mut);padding:30px 20px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal img{max-width:100%;max-height:90vh;border-radius:12px}
+.m-close{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;font-weight:700;font-family:'Noto Sans',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+</style>
+</head>
+<body>
+
+<div id="sr" class="screen center active">
+  <div class="acard">
+    <div class="brand"><span class="ico">💵</span><h1>Cashier नोंदणी</h1><p>Admin मंजुरीनंतर अॅप सुरू होईल<br>सर्व डेटा Firebase मध्ये सेव्ह होईल</p></div>
+    <div class="field"><label>👤 पूर्ण नाव</label><input type="text" id="rn" placeholder="तुमचे पूर्ण नाव"></div>
+    <div class="field"><label>📱 मोबाईल नंबर</label><input type="tel" id="rm" placeholder="10 अंकी" maxlength="10" inputmode="numeric"></div>
+    <div class="field"><label>🔐 पासवर्ड</label><input type="password" id="rp" placeholder="किमान 4 अंक"></div>
+    <div class="field"><label>🔐 पासवर्ड पुन्हा</label><input type="password" id="rp2" placeholder="पुन्हा टाका"></div>
+    <button class="btn btn-grn" id="reg-btn" onclick="doReg()">📤 नोंदणी पाठवा</button>
+    <div class="err" id="rerr"></div>
+    <div class="lrow">आधीच नोंदणी? <span class="link" onclick="go('sl')">लॉगिन करा →</span></div>
+  </div>
+</div>
+
+<div id="sl" class="screen center">
+  <div class="acard">
+    <div class="brand"><span class="ico">🔐</span><h1>Cashier लॉगिन</h1><p>मोबाईल नंबर व पासवर्ड टाका</p></div>
+    <div class="field"><label>📱 मोबाईल नंबर</label><input type="tel" id="lm" placeholder="10 अंकी" maxlength="10" inputmode="numeric"></div>
+    <div class="field"><label>🔐 पासवर्ड</label><input type="password" id="lp" placeholder="पासवर्ड" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-grn" id="log-btn" onclick="doLogin()">लॉगिन करा →</button>
+    <div class="err" id="lerr"></div>
+    <div class="lrow">नवीन? <span class="link" onclick="go('sr')">नोंदणी करा →</span></div>
+  </div>
+</div>
+
+<div id="sw" class="screen">
+  <div class="ww">
+    <div class="pulse">⏳</div>
+    <div class="wt">Admin मंजुरीची प्रतीक्षा</div>
+    <div class="ws">तुमची cashier नोंदणी Firebase मध्ये गेली.<br>Admin मंजूर करताच अॅप <strong>आपोआप</strong> सुरू होईल!</div>
+    <div class="icard" id="winfo"></div>
+    <div class="rej-note" id="rejnote">❌ Admin ने नोंदणी नाकारली.</div>
+    <span class="link" style="font-size:12px" onclick="doLogout()">← वेगळ्या अकाउंटने लॉगिन करा</span>
+  </div>
+</div>
+
+<div id="sa">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="brand2"><div class="b2-ico">💵</div><div><div class="b2-name">कॅश एंट्री</div><div class="b2-sub">Firebase लाईव्ह</div></div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="b2-user"><div class="b2-uname" id="hname">-</div><div class="b2-umeta" id="hmeta">-</div></div>
+        <button class="lout" onclick="doLogout()">लॉगआउट</button>
+      </div>
+    </div>
+    <div class="bal-banner">
+      <div class="bal-row-hdr">
+        <div class="bal-box"><div class="bb-v" id="bb-alloc">₹0</div><div class="bb-l">Admin ने दिलेली कॅश</div></div>
+        <div class="bal-box"><div class="bb-v" id="bb-paid">₹0</div><div class="bb-l">ऑपरेटर्सना दिली</div></div>
+      </div>
+      <div class="bal-big"><div class="bb-amt" id="bb-bal">₹0</div><div class="bb-lbl">माझी शिल्लक कॅश</div></div>
+    </div>
+  </div>
+  <div class="usel-wrap">
+    <span class="sel-lbl">👤 ऑपरेटर निवडा</span>
+    <select class="udrop" id="user-sel" onchange="onUserChange()"><option value="">-- ऑपरेटर निवडा --</option></select>
+    <div id="user-strip" style="display:none" class="ustrip"></div>
+  </div>
+  <div class="content" id="main-content">
+    <div class="no-user" style="margin-top:20px"><div style="font-size:40px;margin-bottom:10px">👆</div><div style="font-weight:700;font-size:15px;margin-bottom:6px">वरून ऑपरेटर निवडा</div></div>
+  </div>
+</div>
+
+<div class="sf" id="sf"><div class="sf-ico">✅</div><div class="sf-msg" id="sf-msg"></div><div class="sf-sub" id="sf-sub"></div></div>
+<div class="modal" id="pmod" onclick="closeMod()"><button class="m-close" onclick="closeMod()">✕</button><img id="modimg" src="" alt="photo"></div>
+<div class="rt-badge" id="rtbadge"><div class="rt-dot"></div>Firebase लाईव्ह</div>
+
+<script>
+const SK='jcb_cash_sess';
+const famt=n=>'₹'+Number(n).toLocaleString('en-IN');
+const ini=n=>(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const fdts=iso=>iso?new Date(iso).toLocaleString('mr-IN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+
+let me=null,selUid=null,cashStr='',payType='cash',editId=null;
+let localPhotoFile=null;
+let allOps=[],selOpTxns=[],selOpPays=[],myAllocs=[],myPays=[];
+let unsubUser=null,unsubOps=null,unsubSelTxns=null,unsubSelPays=null,unsubAllocs=null,unsubMyPays=null;
+
+// ── NAV ──
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);if(el)el.classList.add('active');window.scrollTo(0,0)}
+function doLogout(){
+  [unsubUser,unsubOps,unsubSelTxns,unsubSelPays,unsubAllocs,unsubMyPays].forEach(u=>{try{if(u)u()}catch(e){}});
+  me=null;selUid=null;cashStr='';editId=null;localPhotoFile=null;
+  sessionStorage.removeItem(SK);
+  document.getElementById('sa').classList.remove('on');go('sr');
+}
+
+// ── PHOTO ──
+function trigPh(id){document.getElementById('ph-'+id).click()}
+function onPh(inp,id){const f=inp.files[0];if(!f)return;localPhotoFile=f;const r=new FileReader();r.onload=e=>{document.getElementById('pzi-'+id).src=e.target.result;const pze=document.getElementById('pze-'+id);if(pze)pze.style.display='none';document.getElementById('pzp-'+id).style.display='block'};r.readAsDataURL(f)}
+function retakePh(id){localPhotoFile=null;document.getElementById('pzi-'+id).src='';document.getElementById('pzp-'+id).style.display='none';const pze=document.getElementById('pze-'+id);if(pze)pze.style.display='block';document.getElementById('ph-'+id).value='';setTimeout(()=>document.getElementById('ph-'+id).click(),120)}
+function getPh(id){const img=document.getElementById('pzi-'+id);return img&&img.src&&img.src.length>100?img.src:null}
+function openMod(src){if(!src)return;document.getElementById('modimg').src=src;document.getElementById('pmod').classList.add('open')}
+function closeMod(){document.getElementById('pmod').classList.remove('open')}
+async function uploadPhoto(file,path){if(!file)return null;try{const ref=storage.ref(path);await ref.put(file);return await ref.getDownloadURL()}catch(e){console.warn('Photo upload failed:',e);return null}}
+
+// ── REGISTER ──
+async function doReg(){
+  const n=document.getElementById('rn').value.trim(),m=document.getElementById('rm').value.trim(),p=document.getElementById('rp').value,p2=document.getElementById('rp2').value,e=document.getElementById('rerr');
+  e.textContent='';
+  if(!n){e.textContent='👤 नाव टाका';return}
+  if(!/^\d{10}$/.test(m)){e.textContent='📱 10 अंकी मोबाईल नंबर टाका';return}
+  if(p.length<4){e.textContent='🔐 किमान 4 अंकी पासवर्ड टाका';return}
+  if(p!==p2){e.textContent='🔐 पासवर्ड जुळत नाही';return}
+  const btn=document.getElementById('reg-btn');btn.textContent='⏳ पाठवत आहे...';btn.disabled=true;
+  try{
+    const ex=await db.collection('users').where('mobile','==',m).where('type','==','cashier').get();
+    if(!ex.empty){e.textContent='📱 हा नंबर आधीच नोंदणी केलेला आहे';return}
+    const id='cas_'+Date.now();
+    const user={id,name:n,mobile:m,pass:p,status:'pending',type:'cashier',registeredAt:new Date().toISOString()};
+    await db.collection('users').doc(id).set(user);
+    sessionStorage.setItem(SK,JSON.stringify({id}));
+    showWait(user);startUserListener(id);
+  }catch(err){e.textContent='❌ Error: '+err.message}
+  finally{btn.textContent='📤 नोंदणी पाठवा';btn.disabled=false;}
+}
+
+// ── LOGIN ──
+async function doLogin(){
+  const m=document.getElementById('lm').value.trim(),p=document.getElementById('lp').value,e=document.getElementById('lerr');
+  e.textContent='';
+  const btn=document.getElementById('log-btn');btn.textContent='⏳ लॉगिन होत आहे...';btn.disabled=true;
+  try{
+    const snap=await db.collection('users').where('mobile','==',m).where('pass','==',p).where('type','==','cashier').limit(1).get();
+    if(snap.empty){e.textContent='❌ मोबाईल नंबर किंवा पासवर्ड चुकीचा';return}
+    const user={id:snap.docs[0].id,...snap.docs[0].data()};
+    sessionStorage.setItem(SK,JSON.stringify({id:user.id}));
+    route(user);
+  }catch(err){e.textContent='❌ Error: '+err.message}
+  finally{btn.textContent='लॉगिन करा →';btn.disabled=false;}
+}
+function route(u){if(u.status==='approved')openApp(u);else{showWait(u);startUserListener(u.id)}}
+
+function startUserListener(uid){
+  if(unsubUser)unsubUser();
+  unsubUser=db.collection('users').doc(uid).onSnapshot(doc=>{
+    if(!doc.exists)return;
+    const u={id:doc.id,...doc.data()};
+    if(u.status==='approved'&&!me)openApp(u);
+    else if(u.status==='rejected')document.getElementById('rejnote').style.display='block';
+  },e=>console.warn('User listener:',e));
+}
+
+function showWait(u){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sw').classList.add('active');
+  document.getElementById('winfo').innerHTML=`<div class="irow"><span class="il">👤 नाव</span><span class="iv">${u.name}</span></div><div class="irow"><span class="il">📱 मोबाईल</span><span class="iv">${u.mobile}</span></div><div class="irow"><span class="il">🏷️ प्रकार</span><span class="iv">💵 Cashier</span></div><div class="irow"><span class="il">📊 स्थिती</span><span class="iv" style="color:var(--yel)">⏳ Firebase मध्ये नोंद</span></div>`;
+  document.getElementById('rejnote').style.display=u.status==='rejected'?'block':'none';
+}
+
+function openApp(u){
+  me=u;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const sa=document.getElementById('sa');sa.classList.add('on');sa.style.display='flex';
+  document.getElementById('hname').textContent=u.name;
+  document.getElementById('hmeta').textContent='📱 '+u.mobile;
+  startMainListeners();
+}
+
+// ── REAL-TIME LISTENERS ──
+function startMainListeners(){
+  // Approved operators
+  if(unsubOps)unsubOps();
+  unsubOps=db.collection('users').where('type','==','operator').where('status','==','approved').onSnapshot(snap=>{
+    allOps=snap.docs.map(d=>({id:d.id,...d.data()}));
+    populateDD();
+  },e=>console.warn('Ops:',e));
+
+  // My allocations (admin gave me cash)
+  if(unsubAllocs)unsubAllocs();
+  unsubAllocs=db.collection('cash_alloc').where('cashierId','==',me.id).onSnapshot(snap=>{
+    myAllocs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    updCashierBal();
+  },e=>console.warn('Allocs:',e));
+
+  // My payments (payments I made to operators)
+  if(unsubMyPays)unsubMyPays();
+  unsubMyPays=db.collection('cash_payments').where('payerId','==',me.id).where('payerType','==','cashier').onSnapshot(snap=>{
+    myPays=snap.docs.map(d=>({id:d.id,...d.data()}));
+    updCashierBal();if(selUid)renderMain();
+  },e=>console.warn('MyPays:',e));
+}
+
+function populateDD(){
+  const sel=document.getElementById('user-sel'),cur=sel.value;
+  sel.innerHTML=`<option value="">-- ऑपरेटर निवडा --</option>`+allOps.map(u=>`<option value="${u.id}">${u.name} — ${u.mobile}</option>`).join('');
+  if(cur){sel.value=cur;if(!cur)selUid=null}
+}
+
+function updCashierBal(){
+  const totAlloc=myAllocs.reduce((s,a)=>s+a.amount,0);
+  const totPaid=myPays.reduce((s,p)=>s+p.amount,0);
+  const bal=totAlloc-totPaid;
+  document.getElementById('bb-alloc').textContent=famt(totAlloc);
+  document.getElementById('bb-paid').textContent=famt(totPaid);
+  document.getElementById('bb-bal').textContent=famt(Math.max(0,bal));
+}
+
+function onUserChange(){
+  selUid=document.getElementById('user-sel').value||null;
+  cashStr='';editId=null;payType='cash';localPhotoFile=null;
+  const strip=document.getElementById('user-strip');
+  if(!selUid){strip.style.display='none';showNoUser();return}
+  const u=allOps.find(u=>u.id===selUid);
+  strip.style.display='flex';strip.innerHTML=`<div class="su-ava">${ini(u.name)}</div><div><div class="su-name">${u.name}</div><div class="su-meta">📱 ${u.mobile}${u.location?' | 📍 '+u.location:''}</div></div>`;
+  startSelListeners();
+}
+function showNoUser(){document.getElementById('main-content').innerHTML=`<div class="no-user" style="margin-top:20px"><div style="font-size:40px;margin-bottom:10px">👆</div><div style="font-weight:700;font-size:15px;margin-bottom:6px">वरून ऑपरेटर निवडा</div></div>`}
+
+function startSelListeners(){
+  if(!selUid)return;
+  // Selected operator's approved transactions
+  if(unsubSelTxns)unsubSelTxns();
+  unsubSelTxns=db.collection('transactions').where('userId','==',selUid).where('status','==','approved').onSnapshot(snap=>{
+    selOpTxns=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMain();
+  },e=>console.warn('SelTxns:',e));
+
+  // All payments to selected operator
+  if(unsubSelPays)unsubSelPays();
+  unsubSelPays=db.collection('cash_payments').where('userId','==',selUid).onSnapshot(snap=>{
+    selOpPays=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMain();
+  },e=>console.warn('SelPays:',e));
+}
+
+// ── MAIN RENDER ──
+function renderMain(){
+  if(!selUid){showNoUser();return}
+  const totalOnline=selOpTxns.reduce((s,t)=>s+t.amount,0);
+  const totalPaid=selOpPays.reduce((s,p)=>s+p.amount,0);
+  const opBal=totalOnline-totalPaid;
+  const totAlloc=myAllocs.reduce((s,a)=>s+a.amount,0);
+  const totMyPaid=myPays.reduce((s,p)=>s+p.amount,0);
+  const myCashBal=totAlloc-totMyPaid;
+  const num=parseFloat(cashStr||0);
+  const isOverOp=num>opBal&&opBal>0;
+  const isOverCash=payType==='cash'&&num>myCashBal&&myCashBal>0;
+  const isDisabled=!cashStr||num<=0||isOverOp;
+  const uname=allOps.find(u=>u.id===selUid)?.name||'';
+
+  document.getElementById('main-content').innerHTML=`
+    <div class="op-bal-card">
+      <div class="obc-hdr"><span class="obc-title">📊 ${uname} — शिल्लक</span></div>
+      <div class="bal-strips">
+        <div class="bs"><div class="bs-v" style="color:var(--grn)">${famt(totalOnline)}</div><div class="bs-l">ऑनलाईन मंजूर</div></div>
+        <div class="bs"><div class="bs-v" style="color:var(--pur)">${famt(totalPaid)}</div><div class="bs-l">दिलेली रक्कम</div></div>
+      </div>
+      <div class="bal-highlight">
+        <div class="bh-amt" style="color:${opBal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(opBal))}</div>
+        <div class="bh-lbl">${opBal>0?'💰 द्यायची बाकी':'✅ सर्व सेटल'}</div>
+      </div>
+    </div>
+
+    ${totalOnline>0?`<div class="pay-form">
+      <div class="pay-form-title">💵 Firebase मध्ये पेमेंट नोंद करा</div>
+      <div class="edit-banner" id="edit-banner"><span class="eb-txt">✏️ एंट्री सुधारत आहात</span><button class="eb-cancel" onclick="cancelEdit()">✕ रद्द करा</button></div>
+      <div class="pay-type">
+        <button class="pty ${payType==='cash'?'cash':''}" onclick="setPT('cash')">💵 कॅशमध्ये दिले</button>
+        <button class="pty ${payType==='online'?'online':''}" onclick="setPT('online')">📲 ऑनलाईन पाठवले</button>
+      </div>
+      <div class="amt-display ${cashStr?(isOverOp?'over':'active'):''}">
+        <div class="amt-val" style="color:${cashStr&&isOverOp?'var(--red)':'var(--grn)'}">${cashStr?famt(num):'₹ — — —'}<span class="cur"></span></div>
+        <div class="amt-lbl">रक्कम टाका (₹)</div>
+      </div>
+      <div class="warn-op ${cashStr&&isOverOp?'on':''}">
+        <div class="w-title" style="color:var(--red)">⚠️ जास्त रक्कम!</div>
+        <div class="w-body" style="color:#991b1b">बाकी फक्त <strong>${famt(opBal)}</strong> आहे.<div class="w-fixbtn" style="background:#fee2e2;color:var(--red);border:1px solid #fecaca" onclick="setMax(${opBal})">📌 ${famt(opBal)}</div></div>
+      </div>
+      <div class="warn-cas ${cashStr&&!isOverOp&&isOverCash?'on':''}">
+        <div class="w-title" style="color:var(--yel)">⚠️ तुमची कॅश कमी!</div>
+        <div class="w-body" style="color:#92400e">शिल्लक: <strong>${famt(myCashBal)}</strong><div class="w-fixbtn" style="background:#fef3c7;color:var(--yel);border:1px solid #fde68a" onclick="setMax(${myCashBal})">📌 ${famt(myCashBal)}</div></div>
+      </div>
+      <div class="quick-row">
+        ${opBal>0?`<button class="qbtn full" onclick="setMax(${opBal})">📌 पूर्ण बाकी ${famt(opBal)}</button>`:''}
+        ${[500,1000,2000,5000].filter(v=>v<=(opBal||Infinity)).slice(0,3).map(v=>`<button class="qbtn" onclick="addQ(${v})">+${famt(v)}</button>`).join('')}
+      </div>
+      <div class="numpad">
+        ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="nk" onclick="cashKey('${n}')">${n}</button>`).join('')}
+        <button class="nk" onclick="cashKey('.')">•</button>
+        <button class="nk" onclick="cashKey('0')">0</button>
+        <button class="nk del" onclick="cashDel()">⌫</button>
+      </div>
+      <div class="online-fields ${payType==='online'?'on':''}">
+        <div class="of-title">📲 ऑनलाईन पेमेंट तपशील</div>
+        <div class="field"><label>🧾 ट्रांजेक्शन ID</label><input type="text" id="of-txnid" placeholder="UTR / Ref नंबर..."></div>
+        <div class="field">
+          <label>📸 पेमेंट Screenshot</label>
+          <div id="pze-op" class="pz-empty" onclick="trigPh('op')"><div class="pz-ico">📷</div><div class="pz-ttl">Screenshot काढा</div><div class="pz-sub">Firebase Storage ला upload होईल</div></div>
+          <input type="file" id="ph-op" accept="image/*" capture="environment" style="display:none" onchange="onPh(this,'op')">
+          <div class="pz-preview" id="pzp-op"><img id="pzi-op" class="pz-img" alt="ss" onclick="openMod(getPh('op'))"><div class="pz-bar"><div class="pz-ok">✅ Screenshot OK</div><div class="pz-btns"><button class="pz-zoom" onclick="openMod(getPh('op'))">🔍</button><button class="pz-retake" onclick="retakePh('op')">📷 पुन्हा काढा</button></div></div></div>
+        </div>
+      </div>
+      <div class="upload-bar" id="upload-bar"><div class="spin"></div><span>📤 Firebase Storage ला upload होत आहे...</span></div>
+      <div class="dn-row">
+        <div class="dnf"><label>📅 तारीख</label><input type="date" id="pay-dt" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="dnf"><label>📝 नोंद</label><input type="text" id="pay-note" placeholder="नोंद..."></div>
+      </div>
+      <button class="sub-btn ${payType==='online'?'ol':'ok'} ${isDisabled?'dis':''}" id="sub-btn" onclick="submitPay()">
+        ${payType==='online'?'📲':'💵'} Firebase मध्ये नोंद करा${cashStr&&num>0?' — '+famt(num):''}
+      </button>
+    </div>`:''}
+
+    ${selOpPays.length?`<div class="hist-card">
+      <div class="hc-hdr"><span class="hc-title">📋 या ऑपरेटरला दिलेले</span><span style="color:var(--pur);font-weight:800">${famt(totalPaid)}</span></div>
+      ${selOpPays.slice().sort((a,b)=>b.recordedAt?.localeCompare(a.recordedAt||'')||0).slice(0,15).map(p=>`<div class="hc-row">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="hc-amt" style="color:${p.payerType==='admin'?'var(--grn)':'var(--pur)'}">${famt(p.amount)}</div>
+            <span class="${p.payType==='online'?'type-online':'type-cash'}">${p.payType==='online'?'📲 ऑनलाईन':'💵 कॅश'}</span>
+            ${p.payerType==='admin'?`<span style="background:#dcfce7;color:#14532d;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;margin-left:5px">👑 Admin</span>`:`<span style="background:#ede9fe;color:#5b21b6;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;margin-left:5px">💵 ${p.payerName}</span>`}
+            ${p.txnId?`<div style="color:var(--blue);font-size:11px;margin-top:2px">🧾 ${p.txnId}</div>`:''}
+            <div class="hc-meta">📅 ${p.date}${p.note?' | '+p.note:''}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+            <div style="color:var(--mut);font-size:10px">${fdts(p.recordedAt)}</div>
+            ${p.payerId===me?.id?`<button class="edit-btn" onclick="startEdit('${p.id}')">✏️ बदला</button>`:''}
+          </div>
+        </div>
+        ${p.photoURL?`<img class="hc-photo" src="${p.photoURL}" onclick="openMod('${p.photoURL}')" alt="screenshot">`:''}
+      </div>`).join('')}
+    </div>`:''}
+  `;
+
+  if(editId){
+    setTimeout(()=>{
+      document.getElementById('edit-banner')?.classList.add('on');
+      const entry=selOpPays.find(p=>p.id===editId);
+      if(entry){
+        if(document.getElementById('pay-dt'))document.getElementById('pay-dt').value=entry.date||'';
+        if(document.getElementById('pay-note'))document.getElementById('pay-note').value=entry.note||'';
+        if(payType==='online'&&document.getElementById('of-txnid'))document.getElementById('of-txnid').value=entry.txnId||'';
+        if(entry.photoURL){const pzi=document.getElementById('pzi-op');const pzp=document.getElementById('pzp-op');if(pzi&&pzp){pzi.src=entry.photoURL;pzp.style.display='block';const pze=document.getElementById('pze-op');if(pze)pze.style.display='none'}}
+      }
+    },80);
+  }
+}
+
+// ── NUMPAD ──
+function setPT(t){payType=t;renderMain()}
+function cashKey(k){if(k==='.'&&cashStr.includes('.'))return;if(cashStr.includes('.')&&cashStr.split('.')[1]?.length>=2)return;if(!cashStr&&k==='.')cashStr='0.';else cashStr+=k;renderMain()}
+function cashDel(){cashStr=cashStr.slice(0,-1);renderMain()}
+function setMax(v){cashStr=String(Math.round(v));renderMain()}
+function addQ(v){cashStr=String((parseFloat(cashStr||0)+v));renderMain()}
+function cancelEdit(){editId=null;cashStr='';localPhotoFile=null;renderMain()}
+
+// ── SUBMIT ──
+async function submitPay(){
+  const num=parseFloat(cashStr||0);
+  if(!num||num<=0){alert('💰 रक्कम टाका');return}
+  const totalOnline=selOpTxns.reduce((s,t)=>s+t.amount,0);
+  const prevPaid=selOpPays.filter(p=>p.id!==editId).reduce((s,p)=>s+p.amount,0);
+  const opBal=totalOnline-prevPaid;
+  if(num>opBal&&opBal>0){alert(`❌ जास्त रक्कम! बाकी फक्त ${famt(opBal)}`);return}
+  if(payType==='cash'){
+    const myPrevPaid=myPays.filter(p=>p.id!==editId).reduce((s,p)=>s+p.amount,0);
+    const totAlloc=myAllocs.reduce((s,a)=>s+a.amount,0);
+    const myCashBal=totAlloc-myPrevPaid;
+    if(num>myCashBal&&myCashBal>0&&!confirm(`⚠️ शिल्लक ${famt(myCashBal)} पेक्षा जास्त. पुढे जायचे का?`))return;
+  }
+  const btn=document.getElementById('sub-btn');if(btn){btn.disabled=true;btn.textContent='⏳ Firebase मध्ये नोंद होत आहे...'}
+  try{
+    let photoURL=null;
+    if(localPhotoFile&&payType==='online'){
+      document.getElementById('upload-bar')?.classList.add('on');
+      photoURL=await uploadPhoto(localPhotoFile,'payments/'+me.id+'_'+Date.now()+'.jpg');
+      document.getElementById('upload-bar')?.classList.remove('on');
+    }
+    const u=allOps.find(u=>u.id===selUid);
+    const date=document.getElementById('pay-dt')?.value||new Date().toISOString().split('T')[0];
+    const note=document.getElementById('pay-note')?.value?.trim()||'';
+    const txnId=payType==='online'?document.getElementById('of-txnid')?.value?.trim()||'':'';
+    if(editId){
+      const upd={amount:num,date,note,payType,txnId,editedAt:new Date().toISOString()};
+      if(photoURL)upd.photoURL=photoURL;
+      await db.collection('cash_payments').doc(editId).update(upd);
+    }else{
+      await db.collection('cash_payments').add({userId:selUid,userName:u?.name||'-',amount:num,date,note,payType,txnId,photoURL,payerType:'cashier',payerId:me.id,payerName:me.name,recordedAt:new Date().toISOString()});
+    }
+    const sf=document.getElementById('sf');
+    document.getElementById('sf-msg').textContent=`${famt(num)} — Firebase मध्ये नोंद झाली!`;
+    document.getElementById('sf-sub').textContent=`👤 ${u?.name} | ${payType==='online'?'📲 ऑनलाईन':'💵 कॅश'} | 📅 ${date}`;
+    sf.classList.add('on');setTimeout(()=>sf.classList.remove('on'),2500);
+    cashStr='';editId=null;payType='cash';localPhotoFile=null;
+  }catch(e){alert('❌ Error: '+e.message)}
+  finally{if(btn){btn.disabled=false;}}
+}
+
+function startEdit(pid){
+  const entry=selOpPays.find(p=>p.id===pid);if(!entry)return;
+  editId=pid;cashStr=String(entry.amount);payType=entry.payType||'cash';localPhotoFile=null;renderMain();
+}
+
+// ── INIT ──
+(async function(){
+  const s=sessionStorage.getItem(SK);if(!s){go('sr');return}
+  const {id}=JSON.parse(s);
+  try{
+    const doc=await db.collection('users').doc(id).get();
+    if(!doc.exists){sessionStorage.removeItem(SK);go('sr');return}
+    const u={id:doc.id,...doc.data()};
+    route(u);
+  }catch(e){go('sr')}
+})();
+</script>
+</body>
+</html>

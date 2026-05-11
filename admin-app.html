@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>🚧 JCB Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script>
+/* ══════════════════════════════════════
+   🔥 तुमचा FIREBASE CONFIG येथे टाका
+══════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey:            "AIzaSy-TUMCHA-API-KEY-YEThE-TAKA",
+  authDomain:        "tumcha-project.firebaseapp.com",
+  projectId:         "tumcha-project-id",
+  storageBucket:     "tumcha-project.appspot.com",
+  messagingSenderId: "123456789012",
+  appId:             "1:123456789012:web:abc123def456"
+};
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const storage = firebase.storage();
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f1f5f9;--card:#fff;--border:#e2e8f0;--b2:#cbd5e1;--grn:#16a34a;--grn2:#15803d;--glt:#f0fdf4;--red:#dc2626;--rlt:#fef2f2;--yel:#d97706;--ylt:#fffbeb;--ora:#ea580c;--olt:#fff7ed;--pur:#7c3aed;--plt:#faf5ff;--blue:#2563eb;--blt:#eff6ff;--txt:#1e293b;--t2:#475569;--mut:#94a3b8;--sh:0 2px 12px rgba(0,0,0,.07)}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+#sc-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#f0fdf4,#eff6ff)}
+.lbox{width:100%;max-width:340px;background:var(--card);border-radius:20px;border:1px solid var(--border);padding:30px 24px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.llogo{text-align:center;margin-bottom:22px}.llogo .ico{font-size:52px;display:block;margin-bottom:8px}.llogo h1{color:var(--grn);font-size:20px;font-weight:800;margin-bottom:4px}.llogo p{color:var(--mut);font-size:12px}
+.field{margin-bottom:13px}.field label{display:block;color:var(--t2);font-size:12px;font-weight:700;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border-radius:10px;font-size:14px;background:#f8fafc;border:1.5px solid var(--b2);color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;transition:.2s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--grn);background:#fff;box-shadow:0 0 0 3px rgba(22,163,74,.08)}
+.field textarea{resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:800;font-size:14px;cursor:pointer;font-family:'Noto Sans',sans-serif;transition:.12s}.btn:active{transform:scale(.98)}
+.btn-grn{background:linear-gradient(135deg,var(--grn),var(--grn2));color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.28)}
+.btn-ghost{background:#f8fafc;border:1.5px solid var(--b2);color:var(--t2)}
+.err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;font-weight:600;min-height:16px}
+#sc-main{display:none;flex-direction:column;min-height:100vh}#sc-main.on{display:flex}
+/* TOAST */
+.toast{position:fixed;top:-120px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);border-left:4px solid var(--ora);border-radius:14px;padding:13px 16px;display:flex;align-items:flex-start;gap:10px;width:calc(100% - 24px);max-width:460px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:600;transition:top .4s cubic-bezier(.34,1.56,.64,1)}
+.toast.on{top:12px}
+.toast-ico{font-size:22px;flex-shrink:0}.toast-body{flex:1}.toast-title{font-weight:800;font-size:13px;color:var(--ora);margin-bottom:2px}.toast-msg{font-size:12px;color:var(--t2);line-height:1.4}
+.toast-close{background:none;border:none;color:var(--mut);cursor:pointer;font-size:16px;padding:0;font-family:'Noto Sans',sans-serif;flex-shrink:0}
+.notif-ask{background:var(--olt);border:1px solid #fed7aa;border-radius:10px;padding:10px 13px;margin:12px 12px 0;display:flex;align-items:center;gap:10px;font-size:12px}
+.notif-ask.hide{display:none}
+.na-btn{background:var(--ora);border:none;color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Noto Sans',sans-serif;flex-shrink:0}
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--grn),var(--grn2));padding:14px 14px 12px}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px}.brand-ico{font-size:26px}.brand-name{color:#fff;font-size:17px;font-weight:800}.brand-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.notif-pill{background:var(--red);border-radius:20px;padding:3px 10px;font-weight:800;font-size:12px;color:#fff;display:none}
+.notif-pill.on{display:block;animation:bounce .6s ease infinite alternate}
+@keyframes bounce{from{transform:scale(1)}to{transform:scale(1.1)}}
+.lout{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'Noto Sans',sans-serif;font-weight:700}
+.stats-row{display:flex;gap:5px;overflow-x:auto}
+.sc{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:8px 5px;flex:1;min-width:56px;text-align:center}
+.sv{font-size:12px;font-weight:800;color:#fff}.sl{font-size:9px;color:rgba(255,255,255,.7);margin-top:2px;line-height:1.3}
+/* NAV */
+.nav{display:flex;background:var(--card);border-bottom:2px solid var(--border);overflow-x:auto;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.ntab{flex:1;padding:10px 3px;background:none;border:none;border-bottom:3px solid transparent;color:var(--mut);font-size:9.5px;font-weight:700;cursor:pointer;font-family:'Noto Sans',sans-serif;white-space:nowrap;transition:.2s;text-align:center;min-width:52px;margin-bottom:-2px}
+.ntab.on{color:var(--grn);border-bottom-color:var(--grn)}
+.ntab .nc{display:block;font-size:12px;font-weight:800;margin-bottom:2px}
+/* PANELS */
+.panel{display:none}.panel.on{display:block}
+.content{max-width:540px;margin:0 auto;padding:13px 12px;width:100%}
+.rn{font-size:11px;color:var(--mut);text-align:right;margin-bottom:8px;display:flex;align-items:center;justify-content:flex-end;gap:5px}
+.rt-dot{width:8px;height:8px;border-radius:50%;background:var(--grn);animation:rtpulse 2s infinite}
+@keyframes rtpulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:40px;color:var(--mut);font-size:13px}
+.spin{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--grn);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* CARDS */
+.ucard{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:14px;margin-bottom:10px;box-shadow:var(--sh);border-left:4px solid var(--yel)}
+.ucard.grn{border-left-color:var(--grn)}.ucard.pur{border-left-color:var(--pur)}
+.ava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--grn),var(--grn2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;flex-shrink:0}
+.ava-pur{background:linear-gradient(135deg,var(--pur),#6d28d9)}
+.uact{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.act{flex:1;min-width:70px;padding:9px 0;border-radius:9px;border:none;font-weight:700;cursor:pointer;font-size:12px;font-family:'Noto Sans',sans-serif;transition:.12s}
+.act:active{transform:scale(.97)}
+.act-ap{background:var(--glt);color:var(--grn);border:1.5px solid #bbf7d0}
+.act-rj{background:var(--rlt);color:var(--red);border:1.5px solid #fecaca}
+.act-pur{background:var(--plt);color:var(--pur);border:1.5px solid #e9d5ff}
+.act-ora{background:var(--olt);color:var(--ora);border:1.5px solid #fed7aa}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.bp{background:#fef3c7;color:#92400e}.ba{background:#dcfce7;color:#14532d}.br{background:#fee2e2;color:#991b1b}.brs{background:#dbeafe;color:#1e40af}.bpu{background:#ede9fe;color:#5b21b6}
+/* DROPDOWN */
+.usel-card{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:14px;margin-bottom:13px;box-shadow:var(--sh)}
+.sel-lbl{display:block;color:var(--t2);font-size:12px;font-weight:700;margin-bottom:7px}
+.udrop{width:100%;padding:12px 13px;border-radius:11px;font-size:14px;font-weight:700;background:#f8fafc;border:2px solid var(--grn);color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;-webkit-appearance:none;cursor:pointer}
+.ustrip{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--glt);border-radius:11px;border:1px solid #bbf7d0}
+.su-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--grn),var(--grn2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0}
+.su-name{font-weight:800;font-size:13px}.su-meta{color:var(--mut);font-size:11px;margin-top:1px}
+/* SUM STRIP */
+.sum-strip{display:flex;gap:7px;margin-bottom:13px;overflow-x:auto}
+.ss{flex:1;min-width:75px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 7px;text-align:center;box-shadow:var(--sh)}
+.ss-v{font-size:14px;font-weight:800}.ss-l{color:var(--mut);font-size:9px;margin-top:2px}
+/* TXN */
+.tcard{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:13px 14px;margin-bottom:10px;box-shadow:var(--sh);border-left:4px solid var(--yel)}
+.tcard.ap{border-left-color:var(--grn)}.tcard.rj{border-left-color:var(--red)}.tcard.rs{border-left-color:var(--blue)}
+.user-tag{font-size:11px;color:var(--mut);background:#f8fafc;border:1px solid var(--border);border-radius:6px;padding:2px 8px;margin-bottom:7px;display:inline-block}
+.tphoto{width:100%;border-radius:9px;margin-top:8px;max-height:200px;object-fit:cover;cursor:pointer;border:1px solid var(--border)}
+/* DAY BLOCKS */
+.day-block{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:11px;overflow:hidden;box-shadow:var(--sh)}
+.day-hdr{background:linear-gradient(135deg,var(--glt),var(--blt));padding:11px 13px;border-bottom:1px solid var(--border)}
+.day-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.day-date{font-size:13px;font-weight:800}
+.day-stat-row{display:flex;gap:6px;flex-wrap:wrap}
+.dstat{flex:1;min-width:65px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px;text-align:center}
+.dstat .v{font-size:12px;font-weight:800}.dstat .l{font-size:9px;color:var(--mut);margin-top:1px}
+.txnrow{padding:12px 13px;border-bottom:1px solid var(--border)}.txnrow:last-child{border-bottom:none}
+.pay-row{padding:9px 13px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.pay-row.by-admin{background:var(--glt);border-left:3px solid var(--grn)}
+.pay-row.by-cashier{background:var(--plt);border-left:3px solid var(--pur)}
+.payer-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px}
+.pt-admin{background:#dcfce7;color:#14532d}.pt-cashier{background:#ede9fe;color:#5b21b6}
+.day-bal-strip{display:flex;justify-content:space-between;padding:9px 13px;background:linear-gradient(135deg,var(--glt),var(--blt));border-top:1px solid var(--border);font-size:12px;font-weight:700}
+/* CASHIER CARD */
+.cashier-bal-card{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;box-shadow:var(--sh)}
+.cbc-hdr{background:linear-gradient(135deg,var(--plt),#ede9fe);padding:12px 14px;border-bottom:1px solid #e9d5ff;display:flex;justify-content:space-between;align-items:center}
+.cbc-name{font-weight:800;font-size:14px;color:var(--pur)}
+.cbc-stats{display:flex;border-bottom:1px solid var(--border)}
+.cbc-stat{flex:1;padding:10px 6px;text-align:center;border-right:1px solid var(--border)}.cbc-stat:last-child{border-right:none}
+.cbc-v{font-size:14px;font-weight:800}.cbc-l{font-size:9px;color:var(--mut);margin-top:2px}
+.cbc-acts{display:flex;gap:8px;padding:10px 12px}
+/* FLOAT SHEET */
+.float-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:flex-end;justify-content:center}
+.float-bg.on{display:flex}
+.float-sheet{width:100%;max-width:520px;background:var(--card);border-radius:20px 20px 0 0;padding:20px;max-height:88vh;overflow-y:auto;box-shadow:0 -8px 32px rgba(0,0,0,.15)}
+.fs-handle{width:40px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 16px}
+.fs-title{font-weight:800;font-size:15px;margin-bottom:12px}
+.fs-info{background:#f8fafc;border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:12px}
+.fs-btns{display:flex;gap:8px}
+.fsb{flex:1;padding:12px;border-radius:11px;border:none;font-weight:800;font-size:13px;cursor:pointer;font-family:'Noto Sans',sans-serif;transition:.12s}
+.fsb:active{transform:scale(.97)}
+.fsb-ap{background:var(--glt);color:var(--grn);border:2px solid #bbf7d0}.fsb-rj{background:var(--rlt);color:var(--red);border:2px solid #fecaca}.fsb-cx{background:#f8fafc;color:var(--mut);border:2px solid var(--border)}
+.rej-inp{width:100%;padding:10px 12px;border-radius:9px;font-size:13px;background:#f8fafc;border:1.5px solid #fecaca;color:var(--txt);outline:none;font-family:'Noto Sans',sans-serif;margin-bottom:11px;resize:none}
+.alloc-form{background:var(--plt);border:1.5px solid #e9d5ff;border-radius:12px;padding:13px;margin-bottom:12px}
+.af-title{font-size:12px;font-weight:800;color:var(--pur);margin-bottom:11px}
+.alloc-hist{background:var(--card);border-radius:11px;border:1px solid var(--border);overflow:hidden;margin-top:10px}
+.ah-hdr{padding:9px 13px;background:var(--plt);border-bottom:1px solid #e9d5ff;font-size:11px;font-weight:800;color:var(--pur);display:flex;justify-content:space-between}
+.ah-row{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid var(--border);font-size:13px}.ah-row:last-child{border-bottom:none}
+.frow{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:3px}
+.fbtn{padding:7px 13px;border-radius:20px;border:1.5px solid var(--b2);background:#f8fafc;color:var(--mut);font-size:11px;font-weight:700;cursor:pointer;font-family:'Noto Sans',sans-serif;white-space:nowrap;transition:.12s}
+.fbtn.on{background:var(--grn);border-color:var(--grn);color:#fff}
+/* ANALYSIS */
+.an-card{background:var(--card);border-radius:14px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--sh)}
+.an-hdr{padding:11px 14px;background:linear-gradient(135deg,var(--glt),var(--blt));border-bottom:1px solid var(--border);font-size:12px;font-weight:800;color:var(--grn);text-transform:uppercase;letter-spacing:.6px}
+.an-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px}.an-row:last-child{border-bottom:none}
+.ar-l{color:var(--t2)}.ar-v{font-weight:800}
+.an-total{background:var(--glt);padding:12px 14px;display:flex;justify-content:space-between;font-weight:800;font-size:14px;border-top:1px solid var(--border)}
+.dag{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.dag-box{flex:1;min-width:65px;border-radius:9px;padding:7px;text-align:center;border:1px solid}
+.dag-v{font-size:13px;font-weight:800}.dag-l{font-size:9px;margin-top:1px;color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:50px 20px}.e-ico{font-size:42px;margin-bottom:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal img{max-width:100%;max-height:90vh;border-radius:12px}
+.m-close{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;font-weight:700;font-family:'Noto Sans',sans-serif}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+</style>
+</head>
+<body>
+<div id="sc-login">
+  <div class="lbox">
+    <div class="llogo"><span class="ico">🚧</span><h1>JCB Admin</h1><p>Admin PIN टाका</p></div>
+    <div class="field"><label>🔐 Admin PIN</label><input type="password" id="apin" placeholder="• • • •" maxlength="6" inputmode="numeric" style="text-align:center;letter-spacing:4px;font-size:20px" onkeydown="if(event.key==='Enter')aLogin()"></div>
+    <button class="btn btn-grn" onclick="aLogin()">लॉगिन करा →</button>
+    <div class="err" id="aerr"></div>
+    <p style="text-align:center;margin-top:12px;font-size:11px;color:var(--mut)">Default PIN: <strong style="color:var(--grn)">1234</strong></p>
+  </div>
+</div>
+
+<div id="sc-main">
+  <div class="toast" id="ntToast">
+    <div class="toast-ico">🔔</div>
+    <div class="toast-body"><div class="toast-title" id="ntTitle"></div><div class="toast-msg" id="ntMsg"></div></div>
+    <button class="toast-close" onclick="document.getElementById('ntToast').classList.remove('on')">✕</button>
+  </div>
+  <div class="notif-ask" id="notifAsk">
+    <span>🔔 नवीन एंट्री notification साठी परवानगी द्या</span>
+    <button class="na-btn" onclick="askNotif()">परवानगी द्या</button>
+  </div>
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="brand"><div class="brand-ico">🚧</div><div><div class="brand-name">JCB Admin</div><div class="brand-sub">Firebase Real-time</div></div></div>
+      <div class="hdr-right"><div class="notif-pill" id="hnotif">0</div><button class="lout" onclick="aLogout()">लॉगआउट</button></div>
+    </div>
+    <div class="stats-row">
+      <div class="sc"><div class="sv" id="s-au">0</div><div class="sl">ऑपरेटर</div></div>
+      <div class="sc"><div class="sv" id="s-cas">0</div><div class="sl">Cashier</div></div>
+      <div class="sc"><div class="sv" id="s-ta">₹0</div><div class="sl">मंजूर</div></div>
+      <div class="sc"><div class="sv" id="s-alloc">₹0</div><div class="sl">Cashier ला</div></div>
+      <div class="sc"><div class="sv" id="s-paid">₹0</div><div class="sl">ऑप ला दिले</div></div>
+      <div class="sc"><div class="sv" id="s-bal" style="color:#fde68a">₹0</div><div class="sl">बाकी</div></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="ntab on" onclick="swNav('up',this)"><span class="nc" id="nc-up" style="color:var(--yel)">0</span>नवीन युजर</button>
+    <button class="ntab" onclick="swNav('cashiers',this)"><span class="nc" style="color:var(--pur)">💵</span>Cashiers</button>
+    <button class="ntab" onclick="swNav('tp',this)"><span class="nc" id="nc-tp" style="color:var(--ora)">0</span>मंजुरी</button>
+    <button class="ntab" onclick="swNav('ledger',this)"><span class="nc">📒</span>हिशोब</button>
+    <button class="ntab" onclick="swNav('cashpay',this)"><span class="nc">👑</span>कॅश द्या</button>
+    <button class="ntab" onclick="swNav('anlys',this)"><span class="nc" style="color:var(--grn)">📊</span>विश्लेषण</button>
+  </div>
+  <div id="pan-up" class="panel on"><div class="content"><div class="rn"><div class="rt-dot"></div>Firebase Real-time</div><div id="lst-op"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div><div style="font-size:11px;font-weight:800;color:var(--pur);text-transform:uppercase;letter-spacing:.7px;margin:10px 0 8px;padding-top:8px;border-top:2px solid #e9d5ff">💵 Cashiers</div><div id="lst-cas"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div></div></div>
+  <div id="pan-cashiers" class="panel"><div class="content"><div class="rn"><div class="rt-dot"></div>Real-time</div><div id="cashiers-list"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div></div></div>
+  <div id="pan-tp" class="panel"><div class="content"><div class="rn"><div class="rt-dot"></div>Real-time</div><div id="lst-tp"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div></div></div>
+  <div id="pan-ledger" class="panel">
+    <div class="content">
+      <div class="usel-card"><span class="sel-lbl">👤 ऑपरेटर निवडा</span><select class="udrop" id="ldg-sel" onchange="onLdgChange()"><option value="">-- ऑपरेटर निवडा --</option></select><div id="ldg-strip" style="display:none" class="ustrip"></div></div>
+      <div class="frow" id="ldg-filters" style="display:none"><button class="fbtn on" onclick="ldgFilt('all',this)">सर्व</button><button class="fbtn" onclick="ldgFilt('pending',this)">⏳</button><button class="fbtn" onclick="ldgFilt('resubmitted',this)">🔄</button><button class="fbtn" onclick="ldgFilt('approved',this)">✅</button><button class="fbtn" onclick="ldgFilt('rejected',this)">❌</button></div>
+      <div id="ldg-content"></div>
+    </div>
+  </div>
+  <div id="pan-cashpay" class="panel">
+    <div class="content">
+      <div class="usel-card"><span class="sel-lbl">👤 ऑपरेटर निवडा — Admin डायरेक्ट पेमेंट</span><select class="udrop" id="cp-sel" onchange="onCPChange()"><option value="">-- ऑपरेटर निवडा --</option></select><div id="cp-strip" style="display:none" class="ustrip"></div></div>
+      <div id="cp-content"></div>
+    </div>
+  </div>
+  <div id="pan-anlys" class="panel"><div class="content"><div id="anlys-content"><div class="loading"><div class="spin"></div>लोड होत आहे...</div></div></div></div>
+</div>
+
+<div class="float-bg" id="alloc-bg"><div class="float-sheet" id="alloc-sheet"></div></div>
+<div class="float-bg" id="flt-bg"><div class="float-sheet" id="flt-sheet"></div></div>
+<div class="modal" id="pmod" onclick="closeMod()"><button class="m-close" onclick="closeMod()">✕</button><img id="modimg" src="" alt="photo"></div>
+
+<script>
+const APIN='1234';
+const AK_A='jcb_admin_auth';
+const famt=n=>'₹'+Number(n).toLocaleString('en-IN');
+const fdts=iso=>iso?new Date(iso).toLocaleString('mr-IN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+const ini=n=>(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const TL={fuel:'⛽ डिझेल',oil:'🛢️ तेल',repair:'🔧 दुरुस्ती',other:'📦 इतर'};
+
+let curNav='up',tConf=null,ldgUid=null,ldgFl='all',cpUid=null,allocCid=null;
+let knownTxnIds=new Set(),knownUserIds=new Set();
+// Firestore data cache
+let allUsers=[],allTxns=[],allPays=[],allAllocs=[];
+// Unsub listeners
+let unsubUsers=null,unsubTxns=null,unsubPays=null,unsubAllocs=null;
+
+// ── NOTIFICATIONS ──
+async function askNotif(){if(!('Notification' in window)){document.getElementById('notifAsk').classList.add('hide');return}const p=await Notification.requestPermission();document.getElementById('notifAsk').classList.add('hide');if(p==='granted')showToast('🔔 Notifications चालू!','नवीन एंट्री आल्यावर notification मिळेल.')}
+function checkNotifBanner(){if(!('Notification' in window)||Notification.permission!=='default')document.getElementById('notifAsk').classList.add('hide')}
+function showToast(title,msg){document.getElementById('ntTitle').textContent=title;document.getElementById('ntMsg').textContent=msg;const t=document.getElementById('ntToast');t.classList.remove('on');void t.offsetWidth;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),7000)}
+function fireBNotif(title,body){if('Notification' in window&&Notification.permission==='granted'){try{new Notification(title,{body,tag:'jcb'})}catch(e){}}}
+function detectNew(users,txns){
+  txns.filter(t=>(t.status==='pending'||t.status==='resubmitted')&&!knownTxnIds.has(t.id)).forEach(t=>{const m=`${t.userName} — ${TL[t.type]||''} ${famt(t.amount)} 🚗${t.vehicle}`;showToast('🆕 नवीन व्यवहार!',m);fireBNotif('🆕 JCB – नवीन व्यवहार',m);knownTxnIds.add(t.id)});
+  users.filter(u=>u.status==='pending'&&!knownUserIds.has(u.id)).forEach(u=>{const m=`${u.name} (${u.mobile}) — ${u.type==='cashier'?'Cashier':'Operator'} नोंदणी`;showToast('👤 नवीन नोंदणी!',m);fireBNotif('👤 JCB – नवीन नोंदणी',m);knownUserIds.add(u.id)});
+}
+
+// ── AUTH ──
+function aLogin(){
+  if(document.getElementById('apin').value!==APIN){document.getElementById('aerr').textContent='❌ चुकीचा PIN';return}
+  sessionStorage.setItem(AK_A,'1');
+  document.getElementById('sc-login').style.display='none';
+  document.getElementById('sc-main').classList.add('on');
+  checkNotifBanner();startAllListeners();
+}
+function aLogout(){
+  sessionStorage.removeItem(AK_A);
+  [unsubUsers,unsubTxns,unsubPays,unsubAllocs].forEach(u=>{try{if(u)u()}catch(e){}});
+  document.getElementById('sc-main').classList.remove('on');
+  document.getElementById('sc-login').style.display='flex';
+  document.getElementById('apin').value='';document.getElementById('aerr').textContent='';
+  knownTxnIds.clear();knownUserIds.clear();
+}
+
+// ── REAL-TIME LISTENERS ──
+function startAllListeners(){
+  // Users
+  if(unsubUsers)unsubUsers();
+  unsubUsers=db.collection('users').onSnapshot(snap=>{
+    allUsers=snap.docs.map(d=>({id:d.id,...d.data()}));
+    detectNew(allUsers,allTxns);
+    populateDDs();updStats();renderPanel(curNav);
+  },e=>console.warn('Users:',e));
+
+  // Transactions
+  if(unsubTxns)unsubTxns();
+  unsubTxns=db.collection('transactions').orderBy('submittedAt','desc').onSnapshot(snap=>{
+    allTxns=snap.docs.map(d=>({id:d.id,...d.data()}));
+    detectNew(allUsers,allTxns);
+    updStats();renderPanel(curNav);
+  },e=>console.warn('Txns:',e));
+
+  // Payments
+  if(unsubPays)unsubPays();
+  unsubPays=db.collection('cash_payments').orderBy('recordedAt','desc').onSnapshot(snap=>{
+    allPays=snap.docs.map(d=>({id:d.id,...d.data()}));
+    updStats();renderPanel(curNav);
+  },e=>console.warn('Pays:',e));
+
+  // Allocations
+  if(unsubAllocs)unsubAllocs();
+  unsubAllocs=db.collection('cash_alloc').orderBy('recordedAt','desc').onSnapshot(snap=>{
+    allAllocs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    updStats();renderPanel(curNav);
+  },e=>console.warn('Allocs:',e));
+}
+
+// ── POPULATE DROPDOWNS ──
+function populateDDs(){
+  const ops=allUsers.filter(u=>u.status==='approved'&&u.type==='operator');
+  ['ldg-sel','cp-sel'].forEach(id=>{
+    const s=document.getElementById(id);if(!s)return;
+    const cur=s.value;
+    s.innerHTML=`<option value="">-- ऑपरेटर निवडा --</option>`+ops.map(u=>`<option value="${u.id}">${u.name} — ${u.mobile}</option>`).join('');
+    if(cur)s.value=cur;
+  });
+}
+
+// ── STATS ──
+function updStats(){
+  const ops=allUsers.filter(u=>u.status==='approved'&&u.type==='operator');
+  const cass=allUsers.filter(u=>u.status==='approved'&&u.type==='cashier');
+  const pu=allUsers.filter(u=>u.status==='pending');
+  const apT=allTxns.filter(t=>t.status==='approved');
+  const ptT=allTxns.filter(t=>t.status==='pending'||t.status==='resubmitted');
+  const tot=apT.reduce((s,t)=>s+t.amount,0);
+  const totAlloc=allAllocs.reduce((s,a)=>s+a.amount,0);
+  const totPaid=allPays.reduce((s,p)=>s+p.amount,0);
+  document.getElementById('s-au').textContent=ops.length;
+  document.getElementById('s-cas').textContent=cass.length;
+  document.getElementById('s-ta').textContent=famt(tot);
+  document.getElementById('s-alloc').textContent=famt(totAlloc);
+  document.getElementById('s-paid').textContent=famt(totPaid);
+  document.getElementById('s-bal').textContent=famt(Math.max(0,tot-totPaid));
+  document.getElementById('nc-up').textContent=pu.length;
+  document.getElementById('nc-tp').textContent=ptT.length;
+  const n=pu.length+ptT.length;
+  const np=document.getElementById('hnotif');np.textContent=n;np.classList.toggle('on',n>0);
+}
+
+// ── NAV ──
+function swNav(nav,btn){curNav=nav;document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.getElementById('pan-'+nav).classList.add('on');renderPanel(nav)}
+function renderPanel(nav){
+  if(nav==='up')renderPU();else if(nav==='cashiers')renderCashiers();
+  else if(nav==='tp')renderTP();else if(nav==='ledger')renderLdg();
+  else if(nav==='cashpay')renderCP();else if(nav==='anlys')renderAnlys();
+}
+
+// ── BADGES ──
+function bdg(s){if(s==='pending')return`<span class="badge bp">⏳</span>`;if(s==='approved')return`<span class="badge ba">✅ मंजूर</span>`;if(s==='rejected')return`<span class="badge br">❌ नाकारले</span>`;if(s==='resubmitted')return`<span class="badge brs">🔄 पुन्हा</span>`;return''}
+function ptag(c){if(c.payerType==='admin')return`<span class="payer-tag pt-admin">👑 Admin</span>`;return`<span class="payer-tag pt-cashier">💵 ${c.payerName||'-'}</span>`}
+
+// ── PENDING USERS ──
+function renderPU(){
+  const ops=allUsers.filter(u=>u.status==='pending'&&u.type==='operator');
+  const cass=allUsers.filter(u=>u.status==='pending'&&u.type==='cashier');
+  document.getElementById('lst-op').innerHTML=ops.length?ops.map(uCard).join(''):`<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">✅ प्रतीक्षेत Operators नाहीत</div>`;
+  document.getElementById('lst-cas').innerHTML=cass.length?cass.map(uCard).join(''):`<div style="text-align:center;color:var(--mut);padding:20px;font-size:13px">✅ प्रतीक्षेत Cashiers नाहीत</div>`;
+}
+function uCard(u){return`<div class="ucard ${u.type==='cashier'?'pur':''}">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <div class="ava ${u.type==='cashier'?'ava-pur':''}">${ini(u.name)}</div>
+    <div style="flex:1"><div style="font-weight:800;font-size:14px">${u.name}</div><div style="color:var(--mut);font-size:12px">📱 ${u.mobile}</div>${u.location?`<div style="color:var(--mut);font-size:11px">📍 ${u.location}</div>`:''}</div>
+    <span class="badge ${u.type==='cashier'?'bpu':'bp'}">${u.type==='cashier'?'💵 Cashier':'⛽ Operator'}</span>
+  </div>
+  <div class="uact">
+    <button class="act act-ap" onclick="doUA('${u.id}','approved')">✅ मंजूर करा</button>
+    <button class="act act-rj" onclick="doUA('${u.id}','rejected')">❌ नाकारा</button>
+  </div>
+</div>`}
+async function doUA(uid,action){
+  if(!confirm(action==='approved'?'मंजूर करायचा आहे का?':'नाकारायचा आहे का?'))return;
+  try{await db.collection('users').doc(uid).update({status:action,approvedAt:new Date().toISOString()})}
+  catch(e){alert('Error: '+e.message)}
+}
+
+// ── CASHIERS PANEL ──
+function renderCashiers(){
+  const cass=allUsers.filter(u=>u.status==='approved'&&u.type==='cashier');
+  const el=document.getElementById('cashiers-list');
+  if(!cass.length){el.innerHTML=`<div class="empty"><div class="e-ico">💵</div><div style="font-weight:700">कोणताही मंजूर Cashier नाही</div></div>`;return}
+  el.innerHTML=cass.map(c=>{
+    const ca=allAllocs.filter(a=>a.cashierId===c.id).reduce((s,a)=>s+a.amount,0);
+    const cp=allPays.filter(p=>p.payerId===c.id&&p.payerType==='cashier').reduce((s,p)=>s+p.amount,0);
+    const bal=ca-cp;
+    return`<div class="cashier-bal-card">
+      <div class="cbc-hdr"><div><div class="cbc-name">💵 ${c.name}</div><div style="color:var(--mut);font-size:11px">📱 ${c.mobile}</div></div><span class="badge ba">✅ मंजूर</span></div>
+      <div class="cbc-stats">
+        <div class="cbc-stat"><div class="cbc-v" style="color:var(--blue)">${famt(ca)}</div><div class="cbc-l">Admin ने दिली</div></div>
+        <div class="cbc-stat"><div class="cbc-v" style="color:var(--pur)">${famt(cp)}</div><div class="cbc-l">ऑप ला दिली</div></div>
+        <div class="cbc-stat"><div class="cbc-v" style="color:${bal>0?'var(--yel)':'var(--grn)'}">${famt(bal)}</div><div class="cbc-l">${bal>0?'बाकी':'✅ सेटल'}</div></div>
+      </div>
+      <div class="cbc-acts">
+        <button class="act act-pur" onclick="openAlloc('${c.id}')">💰 कॅश द्या</button>
+        <button class="act act-ora" onclick="viewCashHist('${c.id}')">📋 इतिहास</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openAlloc(cid){
+  allocCid=cid;const c=allUsers.find(u=>u.id===cid);
+  const allocs=allAllocs.filter(a=>a.cashierId===cid);
+  const ca=allocs.reduce((s,a)=>s+a.amount,0);
+  const cp=allPays.filter(p=>p.payerId===cid&&p.payerType==='cashier').reduce((s,p)=>s+p.amount,0);
+  document.getElementById('alloc-sheet').innerHTML=`
+    <div class="fs-handle"></div><div class="fs-title">💰 ${c?.name} ला कॅश द्या</div>
+    <div style="display:flex;gap:7px;margin-bottom:13px">
+      <div class="ss" style="flex:1"><div class="ss-v" style="color:var(--blue)">${famt(ca)}</div><div class="ss-l">दिलेली</div></div>
+      <div class="ss" style="flex:1"><div class="ss-v" style="color:var(--pur)">${famt(cp)}</div><div class="ss-l">वापरली</div></div>
+      <div class="ss" style="flex:1"><div class="ss-v" style="color:var(--yel)">${famt(ca-cp)}</div><div class="ss-l">शिल्लक</div></div>
+    </div>
+    <div class="alloc-form"><div class="af-title">नवीन कॅश द्या</div>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:9px"><label>💰 रक्कम (₹)</label><input type="number" id="al-amt" placeholder="0" min="0" inputmode="numeric"></div>
+        <div class="field" style="margin-bottom:9px"><label>📅 तारीख</label><input type="date" id="al-dt" value="${new Date().toISOString().split('T')[0]}"></div>
+      </div>
+      <div class="field" style="margin-bottom:9px"><label>📝 नोंद</label><input type="text" id="al-note" placeholder="सकाळची कॅश..."></div>
+      <button class="btn btn-grn" style="font-size:13px;padding:11px" onclick="submitAlloc()">💰 Firebase मध्ये नोंद करा</button>
+    </div>
+    ${allocs.length?`<div class="alloc-hist"><div class="ah-hdr"><span>📋 वाटप इतिहास</span><span style="color:var(--pur)">${famt(ca)}</span></div>${allocs.slice(0,8).map(a=>`<div class="ah-row"><div><div style="font-weight:700;color:var(--blue)">${famt(a.amount)}</div><div style="color:var(--mut);font-size:11px">${a.note||''}</div></div><div style="color:var(--mut);font-size:11px">${fdts(a.recordedAt)}</div></div>`).join('')}</div>`:''}
+    <div style="margin-top:12px"><button class="btn btn-ghost" onclick="closeAlloc()">बंद करा</button></div>`;
+  document.getElementById('alloc-bg').classList.add('on');
+}
+async function submitAlloc(){
+  const amt=parseFloat(document.getElementById('al-amt')?.value||0);
+  const date=document.getElementById('al-dt')?.value||new Date().toISOString().split('T')[0];
+  const note=document.getElementById('al-note')?.value?.trim()||'';
+  if(!amt||amt<=0){alert('💰 रक्कम टाका');return}
+  const c=allUsers.find(u=>u.id===allocCid);
+  try{
+    await db.collection('cash_alloc').add({cashierId:allocCid,cashierName:c?.name||'-',amount:amt,date,note,recordedAt:new Date().toISOString()});
+    closeAlloc();
+  }catch(e){alert('Error: '+e.message)}
+}
+function closeAlloc(){allocCid=null;document.getElementById('alloc-bg').classList.remove('on')}
+function viewCashHist(cid){
+  const c=allUsers.find(u=>u.id===cid);
+  const pays=allPays.filter(p=>p.payerId===cid&&p.payerType==='cashier');
+  document.getElementById('alloc-sheet').innerHTML=`
+    <div class="fs-handle"></div><div class="fs-title">📋 ${c?.name} — इतिहास</div>
+    ${pays.length?pays.slice(0,15).map(p=>`<div class="ah-row" style="border:1px solid var(--border);border-radius:10px;margin-bottom:7px;padding:10px 12px">
+      <div><div style="font-weight:700;color:var(--pur)">${famt(p.amount)}</div><div style="color:var(--mut);font-size:11px">👤 ${p.userName} | ${p.payType==='online'?'📲':'💵'}${p.txnId?' 🧾'+p.txnId:''}</div></div>
+      <div style="color:var(--mut);font-size:10px">${fdts(p.recordedAt)}</div>
+    </div>`).join(''):`<div class="empty"><div class="e-ico">📭</div><div>अजून कोणतेही पेमेंट नाही</div></div>`}
+    <div style="margin-top:12px"><button class="btn btn-ghost" onclick="closeAlloc()">बंद करा</button></div>`;
+  document.getElementById('alloc-bg').classList.add('on');
+}
+
+// ── PENDING TXNS ──
+function renderTP(){
+  const txns=allTxns.filter(t=>t.status==='pending'||t.status==='resubmitted');
+  const el=document.getElementById('lst-tp');
+  if(!txns.length){el.innerHTML=`<div class="empty"><div class="e-ico">✅</div><div style="font-weight:700">कोणताही प्रलंबित व्यवहार नाही</div></div>`;return}
+  el.innerHTML=txns.map(t=>buildTR(t,true)).join('');
+}
+function buildTR(t,showAct){
+  return`<div class="tcard ${t.status==='approved'?'ap':t.status==='rejected'?'rj':t.status==='resubmitted'?'rs':''}">
+    <div class="user-tag">👤 ${t.userName||'-'} | 📱 ${t.userMobile||'-'}</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px"><div><div style="font-weight:700;font-size:14px">${TL[t.type]||'📦'}</div><div style="color:var(--mut);font-size:12px;margin-top:2px">🚗 ${t.vehicle}</div></div>${bdg(t.status)}</div>
+    <div style="color:var(--grn);font-weight:800;font-size:18px;margin-bottom:4px">${famt(t.amount)}</div>
+    ${t.refNo?`<div style="color:var(--mut);font-size:11px">🧾 ${t.refNo}</div>`:''}${t.note?`<div style="color:var(--mut);font-size:11px">📝 ${t.note}</div>`:''}
+    ${t.photoURL?`<img class="tphoto" src="${t.photoURL}" onclick="openMod('${t.photoURL}')" alt="photo">`:''}
+    ${t.rejectionNote?`<div style="color:var(--red);background:var(--rlt);border:1px solid #fecaca;border-radius:8px;padding:7px 10px;font-size:12px;margin-top:7px">❌ ${t.rejectionNote}</div>`:''}
+    <div style="color:var(--mut);font-size:10px;margin-top:6px">📤 ${fdts(t.submittedAt)}</div>
+    ${showAct?`<div style="display:flex;gap:7px;margin-top:10px"><button class="act act-ap" onclick="askTA('${t.id}','approved')">✅ मंजूर करा</button><button class="act act-rj" onclick="askTA('${t.id}','rejected')">❌ नाकारा</button></div>`:''}
+  </div>`;
+}
+function askTA(txnId,action){
+  tConf={txnId,action};const t=allTxns.find(t=>t.id===txnId);
+  document.getElementById('flt-sheet').innerHTML=`
+    <div class="fs-handle"></div><div class="fs-title">${action==='approved'?'✅ मंजूर करायचा आहे का?':'❌ नाकारायचा आहे का?'}</div>
+    <div class="fs-info"><div style="font-weight:700;margin-bottom:4px">${TL[t?.type]||'📦'} — 🚗 ${t?.vehicle||'-'}</div><div style="color:var(--grn);font-weight:800;font-size:18px;margin-bottom:4px">${famt(t?.amount||0)}</div><div style="color:var(--mut);font-size:12px">📅 ${t?.date||'-'} | 👤 ${t?.userName||'-'}</div>${t?.refNo?`<div style="color:var(--mut);font-size:11px;margin-top:3px">🧾 ${t.refNo}</div>`:''}</div>
+    ${t?.photoURL?`<div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px">📸 फोटो:</div><img style="width:100%;border-radius:11px;margin-bottom:10px;max-height:220px;object-fit:cover;cursor:pointer;border:1px solid var(--border)" src="${t.photoURL}" onclick="openMod('${t.photoURL}')">`:''}
+    ${action==='rejected'?`<div style="font-size:12px;font-weight:700;color:var(--t2);margin:10px 0 6px">❌ नाकारण्याचे कारण:</div><textarea class="rej-inp" id="rej-inp" rows="2" placeholder="कारण सांगा..."></textarea>`:''}
+    <div class="fs-btns"><button onclick="doTA()" class="fsb ${action==='approved'?'fsb-ap':'fsb-rj'}">हो, ${action==='approved'?'मंजूर करा':'नाकारा'}</button><button onclick="closeFlt()" class="fsb fsb-cx">रद्द</button></div>`;
+  document.getElementById('flt-bg').classList.add('on');
+}
+async function doTA(){
+  if(!tConf)return;const {txnId,action}=tConf;
+  const note=document.getElementById('rej-inp')?.value?.trim()||'';
+  try{await db.collection('transactions').doc(txnId).update({status:action,approvedAt:new Date().toISOString(),rejectionNote:action==='rejected'?(note||'Admin ने नाकारले'):null});closeFlt()}
+  catch(e){alert('Error: '+e.message)}
+}
+function closeFlt(){tConf=null;document.getElementById('flt-bg').classList.remove('on')}
+
+// ── LEDGER ──
+function onLdgChange(){
+  ldgUid=document.getElementById('ldg-sel').value||null;ldgFl='all';
+  const strip=document.getElementById('ldg-strip');
+  if(!ldgUid){strip.style.display='none';document.getElementById('ldg-content').innerHTML='';document.getElementById('ldg-filters').style.display='none';return}
+  const u=allUsers.find(u=>u.id===ldgUid);
+  strip.style.display='flex';strip.innerHTML=`<div class="su-ava">${ini(u.name)}</div><div><div class="su-name">${u.name}</div><div class="su-meta">📱 ${u.mobile}</div></div>`;
+  document.querySelectorAll('#ldg-filters .fbtn').forEach((b,i)=>b.classList.toggle('on',i===0));
+  document.getElementById('ldg-filters').style.display='flex';renderLdg();
+}
+function ldgFilt(f,btn){ldgFl=f;document.querySelectorAll('#ldg-filters .fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLdg()}
+function renderLdg(){
+  const el=document.getElementById('ldg-content');if(!ldgUid){el.innerHTML='';return}
+  const allT=allTxns.filter(t=>t.userId===ldgUid);
+  const allP=allPays.filter(p=>p.userId===ldgUid);
+  const totalOnline=allT.filter(t=>t.status==='approved').reduce((s,t)=>s+t.amount,0);
+  const totalPaid=allP.reduce((s,p)=>s+p.amount,0);
+  const filtered=ldgFl==='all'?allT:allT.filter(t=>t.status===ldgFl);
+  const byDate={};
+  filtered.forEach(t=>{const d=t.date||'?';if(!byDate[d])byDate[d]={txns:[],pays:[]};byDate[d].txns.push(t)});
+  allP.forEach(p=>{const d=p.date||'?';if(!byDate[d])byDate[d]={txns:[],pays:[]};if(!byDate[d].pays.includes(p))byDate[d].pays.push(p)});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  el.innerHTML=`<div class="sum-strip">
+    <div class="ss"><div class="ss-v" style="color:var(--grn)">${famt(totalOnline)}</div><div class="ss-l">ऑनलाईन मंजूर</div></div>
+    <div class="ss"><div class="ss-v" style="color:var(--pur)">${famt(totalPaid)}</div><div class="ss-l">दिलेली रक्कम</div></div>
+    <div class="ss"><div class="ss-v" style="color:${totalOnline-totalPaid>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(totalOnline-totalPaid))}</div><div class="ss-l">${totalOnline-totalPaid>0?'बाकी':'✅ सेटल'}</div></div>
+  </div>
+  ${dates.map(d=>{
+    const {txns:dt,pays:dp}=byDate[d];
+    const dayOnline=dt.filter(t=>t.status==='approved').reduce((s,t)=>s+t.amount,0);
+    const dayPaid=dp.reduce((s,p)=>s+p.amount,0);const dayBal=dayOnline-dayPaid;
+    return`<div class="day-block"><div class="day-hdr"><div class="day-top"><span class="day-date">📅 ${d}</span></div>
+      <div class="day-stat-row">
+        <div class="dstat"><div class="v" style="color:var(--grn)">${famt(dayOnline)}</div><div class="l">ऑनलाईन</div></div>
+        <div class="dstat"><div class="v" style="color:var(--pur)">${famt(dayPaid)}</div><div class="l">दिले</div></div>
+        <div class="dstat"><div class="v" style="color:${dayBal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(dayBal))}</div><div class="l">${dayBal>0?'बाकी':'सेटल'}</div></div>
+      </div></div>
+      ${dt.map(t=>`<div class="txnrow"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><div><div style="font-weight:700">${TL[t.type]||'📦'} — 🚗 ${t.vehicle}</div></div>${bdg(t.status)}</div>
+        <div style="color:var(--grn);font-weight:800;font-size:16px">${famt(t.amount)}</div>
+        ${t.photoURL?`<img style="width:100%;border-radius:8px;margin-top:7px;max-height:100px;object-fit:cover;cursor:pointer;border:1px solid var(--border)" src="${t.photoURL}" onclick="openMod('${t.photoURL}')">`:''}
+        ${t.rejectionNote?`<div style="color:var(--red);font-size:12px;margin-top:5px">❌ ${t.rejectionNote}</div>`:''}
+        ${(t.status==='pending'||t.status==='resubmitted')?`<div style="display:flex;gap:7px;margin-top:9px"><button class="act act-ap" onclick="askTA('${t.id}','approved')">✅ मंजूर</button><button class="act act-rj" onclick="askTA('${t.id}','rejected')">❌ नाकारा</button></div>`:''}
+      </div>`).join('')}
+      ${dp.map(p=>`<div class="pay-row ${p.payerType==='admin'?'by-admin':'by-cashier'}"><div><div style="font-weight:700">${p.payType==='online'?'📲':'💵'} ${famt(p.amount)}</div>${ptag(p)}${p.txnId?`<div style="color:var(--blue);font-size:11px">🧾 ${p.txnId}</div>`:''}</div><div style="color:var(--mut);font-size:10px">${fdts(p.recordedAt)}</div></div>`).join('')}
+      <div class="day-bal-strip"><span>बाकी</span><span style="color:${dayBal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(dayBal))} ${dayBal<=0?'✅':''}</span></div>
+    </div>`;}).join('')||`<div class="empty"><div class="e-ico">📭</div><div>व्यवहार नाहीत</div></div>`}`;
+}
+
+// ── ADMIN CASH PAY ──
+function onCPChange(){
+  cpUid=document.getElementById('cp-sel').value||null;
+  const strip=document.getElementById('cp-strip');
+  if(!cpUid){strip.style.display='none';document.getElementById('cp-content').innerHTML='';return}
+  const u=allUsers.find(u=>u.id===cpUid);
+  strip.style.display='flex';strip.innerHTML=`<div class="su-ava">${ini(u.name)}</div><div><div class="su-name">${u.name}</div><div class="su-meta">📱 ${u.mobile}</div></div>`;
+  renderCP();
+}
+function renderCP(){
+  const el=document.getElementById('cp-content');if(!cpUid){el.innerHTML='';return}
+  const u=allUsers.find(u=>u.id===cpUid);
+  const apT=allTxns.filter(t=>t.userId===cpUid&&t.status==='approved');
+  const allP=allPays.filter(p=>p.userId===cpUid);
+  const totalOnline=apT.reduce((s,t)=>s+t.amount,0);
+  const totalPaid=allP.reduce((s,p)=>s+p.amount,0);const bal=totalOnline-totalPaid;
+  el.innerHTML=`<div class="sum-strip">
+    <div class="ss"><div class="ss-v" style="color:var(--grn)">${famt(totalOnline)}</div><div class="ss-l">ऑनलाईन</div></div>
+    <div class="ss"><div class="ss-v" style="color:var(--pur)">${famt(totalPaid)}</div><div class="ss-l">दिले</div></div>
+    <div class="ss"><div class="ss-v" style="color:${bal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(bal))}</div><div class="ss-l">${bal>0?'बाकी':'✅ सेटल'}</div></div>
+  </div>
+  <div style="background:var(--glt);border:2px solid #bbf7d0;border-radius:13px;padding:15px;margin-bottom:13px">
+    <div style="font-size:13px;font-weight:800;color:var(--grn);margin-bottom:12px">👑 Admin डायरेक्ट पेमेंट</div>
+    <div class="field"><label>💰 रक्कम (₹)</label><input type="number" id="cp-amt" placeholder="${bal>0?bal:0}" min="0" inputmode="decimal"></div>
+    <div class="grid2">
+      <div class="field"><label>📅 तारीख</label><input type="date" id="cp-dt" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="field"><label>📋 प्रकार</label><select id="cp-type"><option value="cash">💵 कॅश</option><option value="online">📲 ऑनलाईन</option></select></div>
+    </div>
+    <div class="field"><label>🧾 TxnID</label><input type="text" id="cp-txnid" placeholder="UTR / Ref नं..."></div>
+    <div class="field"><label>📝 नोंद</label><input type="text" id="cp-note" placeholder="नोंद..."></div>
+    ${bal>0?`<div style="margin-bottom:10px"><button class="btn btn-ghost" style="font-size:12px;padding:10px" onclick="document.getElementById('cp-amt').value=${bal}">📌 पूर्ण बाकी: ${famt(bal)}</button></div>`:''}
+    <button class="btn btn-grn" onclick="submitCPay()">👑 Firebase मध्ये नोंद करा</button>
+  </div>
+  ${allP.length?`<div class="an-card"><div class="an-hdr">📋 पेमेंट इतिहास</div>${allP.slice(0,10).map(p=>`<div class="an-row"><div><div style="font-weight:700">${p.payType==='online'?'📲':'💵'} ${famt(p.amount)}</div>${ptag(p)}${p.txnId?`<div style="color:var(--blue);font-size:11px">🧾 ${p.txnId}</div>`:''}</div><div style="color:var(--mut);font-size:10px">${fdts(p.recordedAt)}</div></div>`).join('')}</div>`:''}`;
+}
+async function submitCPay(){
+  const amt=parseFloat(document.getElementById('cp-amt')?.value||0);
+  if(!amt||amt<=0){alert('💰 रक्कम टाका');return}
+  const u=allUsers.find(u=>u.id===cpUid);
+  try{
+    await db.collection('cash_payments').add({userId:cpUid,userName:u?.name||'-',amount:amt,date:document.getElementById('cp-dt')?.value||new Date().toISOString().split('T')[0],note:document.getElementById('cp-note')?.value?.trim()||'',payType:document.getElementById('cp-type')?.value||'cash',txnId:document.getElementById('cp-txnid')?.value?.trim()||'',photoURL:null,payerType:'admin',payerId:'admin',payerName:'Admin',recordedAt:new Date().toISOString()});
+    alert(`✅ ${famt(amt)} ${u?.name} ला नोंद झाली!`);
+  }catch(e){alert('Error: '+e.message)}
+}
+
+// ── ANALYSIS ──
+function renderAnlys(){
+  const el=document.getElementById('anlys-content');
+  const ops=allUsers.filter(u=>u.status==='approved'&&u.type==='operator');
+  const cass=allUsers.filter(u=>u.status==='approved'&&u.type==='cashier');
+  const apT=allTxns.filter(t=>t.status==='approved');
+  const totOnline=apT.reduce((s,t)=>s+t.amount,0);
+  const totAlloc=allAllocs.reduce((s,a)=>s+a.amount,0);
+  const totPaid=allPays.reduce((s,p)=>s+p.amount,0);
+  const byDate={};
+  allTxns.forEach(t=>{const d=t.date||'?';if(!byDate[d])byDate[d]={online:0,paid:0,pend:0};if(t.status==='approved')byDate[d].online+=t.amount;if(t.status==='pending'||t.status==='resubmitted')byDate[d].pend+=t.amount});
+  allPays.forEach(p=>{const d=p.date||'?';if(!byDate[d])byDate[d]={online:0,paid:0,pend:0};byDate[d].paid+=p.amount});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  el.innerHTML=`
+    <div class="an-card"><div class="an-hdr">📊 एकूण सारांश</div>
+      <div class="an-row"><span class="ar-l">✅ मंजूर ऑनलाईन</span><span class="ar-v" style="color:var(--grn)">${famt(totOnline)}</span></div>
+      <div class="an-row"><span class="ar-l">💰 Cashiers ना वाटली</span><span class="ar-v" style="color:var(--blue)">${famt(totAlloc)}</span></div>
+      <div class="an-row"><span class="ar-l">💵 ऑपरेटर्सला दिले</span><span class="ar-v" style="color:var(--pur)">${famt(totPaid)}</span></div>
+      <div class="an-total"><span>${totOnline-totPaid>0?'💰 एकूण बाकी':'✅ सर्व सेटल'}</span><span style="color:${totOnline-totPaid>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(totOnline-totPaid))}</span></div>
+    </div>
+    <div class="an-card"><div class="an-hdr">💵 Cashier Balance</div>
+      ${cass.map(c=>{const ca=allAllocs.filter(a=>a.cashierId===c.id).reduce((s,a)=>s+a.amount,0);const cp=allPays.filter(p=>p.payerId===c.id&&p.payerType==='cashier').reduce((s,p)=>s+p.amount,0);const cb=ca-cp;return`<div class="an-row"><div><div style="font-weight:700">💵 ${c.name}</div><div style="color:var(--mut);font-size:11px">📱 ${c.mobile}</div></div><div style="text-align:right"><div style="color:var(--blue);font-weight:700">${famt(ca)}</div><div style="color:var(--pur);font-size:12px">दिले: ${famt(cp)}</div><div style="color:${cb>0?'var(--yel)':'var(--grn)'};font-weight:800">${cb>0?'शिल्लक: '+famt(cb):'✅ सेटल'}</div></div></div>`}).join('')||'<div class="an-row" style="color:var(--mut)">कोणताही cashier नाही</div>'}
+    </div>
+    <div class="an-card"><div class="an-hdr">👤 Operator Balance</div>
+      ${ops.map(u=>{const ut=apT.filter(t=>t.userId===u.id).reduce((s,t)=>s+t.amount,0);const up=allPays.filter(p=>p.userId===u.id).reduce((s,p)=>s+p.amount,0);const ub=ut-up;return`<div class="an-row"><div><div style="font-weight:700">⛽ ${u.name}</div><div style="color:var(--mut);font-size:11px">📱 ${u.mobile}</div></div><div style="text-align:right"><div style="color:var(--grn);font-weight:700">${famt(ut)}</div><div style="color:var(--pur);font-size:12px">मिळाले: ${famt(up)}</div><div style="color:${ub>0?'var(--yel)':'var(--grn)'};font-weight:800">${ub>0?'बाकी: '+famt(ub):'✅ सेटल'}</div></div></div>`}).join('')||'<div class="an-row" style="color:var(--mut)">कोणताही operator नाही</div>'}
+    </div>
+    <div class="an-card"><div class="an-hdr">📅 दिवसनिहाय</div>
+      ${dates.map(d=>{const {online,paid,pend}=byDate[d];const bal=online-paid;return`<div class="an-row" style="flex-direction:column;align-items:stretch;gap:5px"><div style="font-weight:700;font-size:13px">📅 ${d}</div><div class="dag"><div class="dag-box" style="background:var(--glt);border-color:#bbf7d0"><div class="dag-v" style="color:var(--grn)">${famt(online)}</div><div class="dag-l">ऑनलाईन</div></div><div class="dag-box" style="background:var(--plt);border-color:#e9d5ff"><div class="dag-v" style="color:var(--pur)">${famt(paid)}</div><div class="dag-l">दिले</div></div>${pend>0?`<div class="dag-box" style="background:var(--olt);border-color:#fed7aa"><div class="dag-v" style="color:var(--ora)">${famt(pend)}</div><div class="dag-l">प्रतीक्षेत</div></div>`:''}<div class="dag-box" style="background:${bal>0?'var(--ylt)':'var(--glt)'};border-color:${bal>0?'#fde68a':'#bbf7d0'}"><div class="dag-v" style="color:${bal>0?'var(--yel)':'var(--grn)'}">${famt(Math.abs(bal))}</div><div class="dag-l">${bal>0?'बाकी':'सेटल'}</div></div></div></div>`}).join('')}
+    </div>`;
+}
+
+function openMod(src){if(!src)return;document.getElementById('modimg').src=src;document.getElementById('pmod').classList.add('open')}
+function closeMod(){document.getElementById('pmod').classList.remove('open')}
+
+if(sessionStorage.getItem(AK_A)==='1'){document.getElementById('sc-login').style.display='none';document.getElementById('sc-main').classList.add('on');checkNotifBanner();startAllListeners()}
+</script>
+</body>
+</html>
